@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 
 /**
- * Project {PROJECT_NAME}
+ * Project WebNode
  */
 public class NodeConfig {
 

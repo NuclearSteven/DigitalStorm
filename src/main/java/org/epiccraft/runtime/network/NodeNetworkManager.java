@@ -3,7 +3,7 @@ package org.epiccraft.runtime.network;
 import org.epiccraft.WebNode;
 
 /**
- * Project {PROJECT_NAME}
+ * Project WebNode
  */
 public class NodeNetworkManager {
 
