@@ -15,7 +15,7 @@ public class NodeNetworkManager {
     }
 
     private void initialize() {
-
+        serverSocket = new ServerSocket()
     }
 
 }
