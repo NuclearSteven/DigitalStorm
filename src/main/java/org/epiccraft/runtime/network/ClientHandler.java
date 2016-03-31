@@ -2,6 +2,7 @@ package org.epiccraft.runtime.network;
 
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,6 +15,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     public ClientHandler(ClientHandler clientHandler) {
         this.clientHandler = clientHandler;
+        firstMessage = new ArrayList<Integer>();
     }
 
 }
