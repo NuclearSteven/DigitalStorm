@@ -10,10 +10,10 @@ import java.util.List;
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     private final List<Integer> firstMessage;
-    private NodeNetworkManager nodeNetworkManager;
+    private ClientHandler clientHandler;
 
-    public ClientHandler(NodeNetworkManager nodeNetworkManager) {
-        this.nodeNetworkManager = nodeNetworkManager;
+    public ClientHandler(ClientHandler clientHandler) {
+        this.clientHandler = clientHandler;
     }
 
 }
