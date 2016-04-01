@@ -21,11 +21,14 @@ import java.net.InetSocketAddress;
  */
 public class ClientSocket {
 
-    public ClientSocket(InetSocketAddress address, boolean ssl) throws Exception {
-        this(address, ssl, 256);
+    private NodeNetworkManager networkManager;
+
+    public ClientSocket(NodeNetworkManager nodeNetworkManager, InetSocketAddress address, boolean ssl) throws Exception {
+        this(nodeNetworkManager, address, ssl, 256);
     }
 
-    public ClientSocket(final InetSocketAddress address, boolean ssl, int size) throws Exception {
+    public ClientSocket(final NodeNetworkManager nodeNetworkManager, final InetSocketAddress address, boolean ssl, int size) throws Exception {
+        this.networkManager = nodeNetworkManager;
         final SslContext sslCtx;
         if (ssl) {
             sslCtx = SslContextBuilder.forClient()
@@ -49,11 +52,14 @@ public class ClientSocket {
                             p.addLast(
                                     new ObjectEncoder(),
                                     new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-
+                                    new ClientHandler(nodeNetworkManager)
                             );
-
                         }
                     });
+
+            b.connect(address).sync().channel().closeFuture().sync();
+        } finally {
+            group.shutdownGracefully();
         }
     }
 

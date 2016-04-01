@@ -11,11 +11,12 @@ import java.util.List;
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     private final List<Integer> firstMessage;
-    private ClientHandler clientHandler;
+    private NodeNetworkManager networkManager;
 
-    public ClientHandler(ClientHandler clientHandler) {
-        this.clientHandler = clientHandler;
+    public ClientHandler(NodeNetworkManager nodeNetworkManager) {
+        this.networkManager = nodeNetworkManager;
         firstMessage = new ArrayList<Integer>();
+        for (int i = 0; )
     }
 
 }
