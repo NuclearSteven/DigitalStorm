@@ -24,10 +24,12 @@ import java.net.InetSocketAddress;
  */
 public class ServerSocket {
 
+    private ServerHandler serverHandler;
     private NodeNetworkManager networkManager;
 
     public ServerSocket(final NodeNetworkManager nodeNetworkManager, InetSocketAddress localAddr, boolean ssl) throws Exception {
         networkManager = nodeNetworkManager;
+        this.serverHandler = new ServerHandler(nodeNetworkManager);
 
         final SslContext sslCtx;
         if (ssl) {
@@ -55,7 +57,7 @@ public class ServerSocket {
                             p.addLast(
                                     new ObjectEncoder(),
                                     new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                    new ServerHandler(nodeNetworkManager)
+                                    serverHandler
                             );
                         }
                     });
@@ -65,6 +67,10 @@ public class ServerSocket {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
+    }
+
+    public ServerHandler getServerHandler() {
+        return serverHandler;
     }
 
 }

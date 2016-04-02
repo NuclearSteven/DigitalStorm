@@ -3,11 +3,14 @@ package org.epiccraft;
 import org.epiccraft.runtime.exception.ConfigInvalidException;
 import org.epiccraft.runtime.network.NodeNetworkManager;
 
+import java.util.logging.Logger;
+
 /**
  * Project WebNode
  */
 public class WebNode {
 
+    private Logger logger;
     private NodeConfig config;
     private NodeNetworkManager networkManager;
 
@@ -26,6 +29,24 @@ public class WebNode {
         }
 
         return new WebNode(nodeConfig);
+    }
+
+    //Getters
+
+    public NodeConfig getConfig() {
+        return config;
+    }
+
+    public Logger getLogger() {
+        if (logger == null) {
+            logger = Logger.getLogger("Main");
+        }
+
+        return logger;
+    }
+
+    public NodeNetworkManager getNetworkManager() {
+        return networkManager;
     }
 
 }
