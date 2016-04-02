@@ -16,7 +16,9 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     public ClientHandler(NodeNetworkManager nodeNetworkManager) {
         this.networkManager = nodeNetworkManager;
         firstMessage = new ArrayList<Integer>();
-        for (int i = 0; )
+        for (int i = 0; i < networkManager.getClientSocket().getSize(); i++) {
+			firstMessage.add(i);
+		}
     }
 
 }

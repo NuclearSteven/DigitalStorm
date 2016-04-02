@@ -24,5 +24,13 @@ public class NodeNetworkManager {
             node.getLogger().warning("Could not connect to network: " + e.getMessage());
         }
     }
+	
+	public ServerSocket getServerSocket() {
+		return serverSocket;
+	}
+	
+	public ClientSocket getClientSocket() {
+		return clientSocket;
+	}
 
 }

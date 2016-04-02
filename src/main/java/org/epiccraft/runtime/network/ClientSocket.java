@@ -23,6 +23,7 @@ public class ClientSocket {
 
     private ClientHandler clientHandler;
     private NodeNetworkManager networkManager;
+	private int size;
 
     public ClientSocket(NodeNetworkManager nodeNetworkManager, InetSocketAddress address, boolean ssl) throws Exception {
         this(nodeNetworkManager, address, ssl, 256);
@@ -31,6 +32,7 @@ public class ClientSocket {
     public ClientSocket(final NodeNetworkManager nodeNetworkManager, final InetSocketAddress address, boolean ssl, int size) throws Exception {
         this.networkManager = nodeNetworkManager;
         this.clientHandler = new ClientHandler(nodeNetworkManager);
+		this.size = size;
 
         final SslContext sslCtx;
         if (ssl) {
@@ -69,5 +71,9 @@ public class ClientSocket {
     public ClientHandler getClientHandler() {
         return clientHandler;
     }
+	
+	public int getSize() {
+		return size;
+	}
 
 }
