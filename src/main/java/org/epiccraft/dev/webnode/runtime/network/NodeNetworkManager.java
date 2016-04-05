@@ -3,6 +3,7 @@ package org.epiccraft.dev.webnode.runtime.network;
 import org.epiccraft.dev.webnode.WebNode;
 import org.epiccraft.dev.webnode.structure.Node;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -45,5 +46,9 @@ public class NodeNetworkManager {
 
     public WebNode getNode() {
         return node;
+    }
+
+    public String getNetworkID(InetSocketAddress address) {
+        return address.getHostString() + ":" + address.getPort();
     }
 }

@@ -15,15 +15,16 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Project WebNode
  */
 public class ServerSocket {
 
-    private ServerHandler serverHandler;
     private NodeNetworkManager networkManager;
     private ChannelFuture channelFuture;
+    private ConcurrentHashMap<String, ServerHandler> serverHandlers = new ConcurrentHashMap<>();
 
     public ChannelFuture getChannelFuture() {
         return channelFuture;
@@ -31,7 +32,6 @@ public class ServerSocket {
 
     public ServerSocket(final NodeNetworkManager nodeNetworkManager, InetSocketAddress localAddr, boolean ssl) throws Exception {
         networkManager = nodeNetworkManager;
-        this.serverHandler = new ServerHandler(nodeNetworkManager);
 
         final SslContext sslCtx;
         if (ssl) {
@@ -60,7 +60,7 @@ public class ServerSocket {
                             p.addLast(
                                     new ObjectEncoder(),
                                     new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                    serverHandler
+                                    newServerHandler(ch.remoteAddress(), ch)//// TODO: 4/5/2016 Check needed
                             );
                         }
                     })
@@ -77,7 +77,9 @@ public class ServerSocket {
         }
     }
 
-    public ServerHandler getServerHandler() {
+    private ServerHandler newServerHandler(InetSocketAddress address, SocketChannel ch) {
+        ServerHandler serverHandler = new ServerHandler(networkManager, ch);
+        serverHandlers.put(networkManager.getNetworkID(address), serverHandler);
         return serverHandler;
     }
 

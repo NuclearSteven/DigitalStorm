@@ -2,6 +2,7 @@ package org.epiccraft.dev.webnode.runtime.network;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.socket.SocketChannel;
 import org.epiccraft.dev.webnode.protocol.info.reply.HandshakeReply;
 import org.epiccraft.dev.webnode.protocol.info.request.HandshakeRequest;
 
@@ -10,10 +11,12 @@ import org.epiccraft.dev.webnode.protocol.info.request.HandshakeRequest;
  */
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
-    private NodeNetworkManager networkManager;
+	private SocketChannel socketChannel;
+	private NodeNetworkManager networkManager;
 
-    public ClientHandler(NodeNetworkManager nodeNetworkManager) {
+    public ClientHandler(NodeNetworkManager nodeNetworkManager, SocketChannel ch) {
         this.networkManager = nodeNetworkManager;
+		this.socketChannel = ch;
     }
 
 	@Override

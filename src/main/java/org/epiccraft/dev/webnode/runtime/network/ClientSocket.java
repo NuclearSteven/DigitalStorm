@@ -16,19 +16,19 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Project WebNode
  */
 public class ClientSocket {
 
-    private ClientHandler clientHandler;
     private NodeNetworkManager networkManager;
     private ChannelFuture channelFuture;
+    private ConcurrentHashMap<String, ClientHandler> clientHandlers = new ConcurrentHashMap<>();
 
     public ClientSocket(final NodeNetworkManager nodeNetworkManager, final InetSocketAddress address, boolean ssl) throws Exception {
         this.networkManager = nodeNetworkManager;
-        this.clientHandler = new ClientHandler(nodeNetworkManager);
 
         final SslContext sslCtx;
         if (ssl) {
@@ -53,7 +53,7 @@ public class ClientSocket {
                             p.addLast(
                                     new ObjectEncoder(),
                                     new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                    clientHandler
+                                    newClientHandler(ch.remoteAddress(), ch)//// TODO: 4/5/2016 Check needed
                             );
                         }
                     });
@@ -66,7 +66,9 @@ public class ClientSocket {
         }
     }
 
-    public ClientHandler getClientHandler() {
+    private ClientHandler newClientHandler(InetSocketAddress address, SocketChannel ch) {
+        ClientHandler clientHandler = new ClientHandler(networkManager, ch);
+        clientHandlers.put(networkManager.getNetworkID(address), clientHandler);
         return clientHandler;
     }
 
