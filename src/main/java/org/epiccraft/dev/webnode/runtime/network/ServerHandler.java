@@ -29,6 +29,10 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         handlePacket(ctx, msg);
     }
 
+    public SocketChannel getSocketChannel() {
+        return socketChannel;
+    }
+
     private void handlePacket(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof HandshakeRequest) {
             HandshakeReply reply = new HandshakeReply();
@@ -38,13 +42,14 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 nodeNetworkManager.getNodeMap().forEach((aLong, node) -> {
                     list.add(node);
                 });
+                reply.nodeUnits = list;
             } else {
                 reply.authSuccess = false;
             }
             ctx.write(msg);
+            nodeNetworkManager.newNode(this, ((HandshakeRequest) msg).nodeID);
         }
 
-        ctx.flush();
         ReferenceCountUtil.release(msg);
     }
 

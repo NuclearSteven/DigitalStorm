@@ -19,6 +19,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 		this.socketChannel = ch;
     }
 
+	public SocketChannel getSocketChannel() {
+		return socketChannel;
+	}
+
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
@@ -26,6 +30,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 		handshakeRequest.connectPassword = networkManager.getNode().getConfig().connectionPassword;
 		ctx.write(handshakeRequest);
 		ctx.flush();
+
 	}
 
 	@Override
