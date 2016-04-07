@@ -19,4 +19,11 @@ public class Node implements NodeUnit {
         NodeGroup.group(this);
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public ServerHandler getServerHandler() {
+        return serverHandler;
+    }
 }
