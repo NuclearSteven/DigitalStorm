@@ -1,10 +1,15 @@
 package org.epiccraft.dev.webnode.runtime.network;
 
 import org.epiccraft.dev.webnode.WebNode;
+import org.epiccraft.dev.webnode.runtime.exception.NodeAlreadyConnectedException;
+import org.epiccraft.dev.webnode.runtime.network.client.ClientSocket;
+import org.epiccraft.dev.webnode.runtime.network.server.ServerSocket;
 import org.epiccraft.dev.webnode.structure.Node;
-import org.epiccraft.dev.webnode.structure.NodeUnit;
+import org.epiccraft.dev.webnode.structure.NodeInfo;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -15,14 +20,14 @@ public class NodeNetworkManager {
     private WebNode node;
     private ServerSocket serverSocket;
     private ClientSocket clientSocket;
-    private ConcurrentHashMap<Long, Node> nodeMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<UUID, Node> nodeMap = new ConcurrentHashMap<>();
 
     public NodeNetworkManager(WebNode webNode) {
         node = webNode;
         initialize();
     }
 
-    public ConcurrentHashMap<Long, Node> getNodeMap() {
+    public ConcurrentHashMap<UUID, Node> getNodeMap() {
         return nodeMap;
     }
 
@@ -53,8 +58,21 @@ public class NodeNetworkManager {
         return address.getHostString() + ":" + address.getPort();
     }
 
-    public void newNode(ServerHandler serverHandler, long nid) {
-        NodeUnit nodeUnit = new Node(serverHandler, nid);
+    public Node newNodeConnected(NodeInfo nodeInfo) throws NodeAlreadyConnectedException {
+        boolean match = false;
+        for (Map.Entry<UUID, Node> uuidNodeEntry : getNodeMap().entrySet()) {
+            if (uuidNodeEntry.getKey().equals(nodeInfo.nodeUUID)) {
+                match = true;
+            }
+        }
+
+        if (match) {
+            throw new NodeAlreadyConnectedException();
+        }
+
+        Node nodeUnit = new Node(this, nodeInfo.nodeUUID, nodeInfo.nodeGroup);
+        nodeMap.put(nodeInfo.nodeUUID, nodeUnit);
+        return nodeUnit;
     }
 
 }

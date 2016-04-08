@@ -1,4 +1,4 @@
-package org.epiccraft.dev.webnode.runtime.network;
+package org.epiccraft.dev.webnode.runtime.network.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -13,6 +13,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
+import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;

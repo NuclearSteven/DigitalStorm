@@ -1,8 +1,9 @@
 package org.epiccraft.dev.webnode.protocol.info.reply;
 
 import org.epiccraft.dev.webnode.protocol.info.Reply;
-import org.epiccraft.dev.webnode.structure.NodeUnit;
+import org.epiccraft.dev.webnode.structure.NodeInfo;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
@@ -11,6 +12,7 @@ import java.util.List;
 public class HandshakeReply extends Reply {
 
     public boolean authSuccess;
-    public List<NodeUnit> nodeUnits;
+    public List<InetSocketAddress> nodeUnits;
+    public NodeInfo nodeInfo; //remote node info
 
 }

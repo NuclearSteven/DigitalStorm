@@ -25,6 +25,11 @@ public class NodeConfig {
     public String connectionPassword = null;
 
     /**
+     * Node group
+     */
+    public String nodeGroup = null;
+
+    /**
      * Secured connection.
      * This option must be enabled or disabled on all nodes to create a network.
      */

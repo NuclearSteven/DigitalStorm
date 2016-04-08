@@ -1,7 +1,9 @@
 package org.epiccraft.dev.webnode.structure;
 
 import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
-import org.epiccraft.dev.webnode.runtime.network.ServerHandler;
+import org.epiccraft.dev.webnode.runtime.network.PacketHandler;
+
+import java.util.UUID;
 
 /**
  * Project WebNode
@@ -9,21 +11,36 @@ import org.epiccraft.dev.webnode.runtime.network.ServerHandler;
 public class Node implements NodeUnit {
 
     private NodeNetworkManager networkManager;
-    private ServerHandler serverHandler;
-    public long id;
+    public UUID id;
+    private PacketHandler handler;
 
-    public Node(NodeNetworkManager nodeNetworkManager, ServerHandler serverHandler, long nid) {
-        this.networkManager = nodeNetworkManager;
-        this.serverHandler = serverHandler;
-        this.id = nid;
-        NodeGroup.group(this);
+    public NodeGroup getFromGroup() {
+        return fromGroup;
     }
 
-    public long getId() {
+    public void setFromGroup(NodeGroup fromGroup) {
+        this.fromGroup = fromGroup;
+    }
+
+    private NodeGroup fromGroup;
+
+    public Node(NodeNetworkManager nodeNetworkManager, UUID nid, String nodeGroup) {
+        this.networkManager = nodeNetworkManager;
+        this.id = nid;
+        NodeGroup.group(this, nodeGroup);
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public ServerHandler getServerHandler() {
-        return serverHandler;
+    public PacketHandler getHandler() {
+        return handler;
     }
+
+    public Node bindHandler(PacketHandler handler) {
+        this.handler = handler;
+        return this;
+    }
+
 }

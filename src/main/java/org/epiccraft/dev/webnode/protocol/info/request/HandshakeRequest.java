@@ -1,7 +1,7 @@
 package org.epiccraft.dev.webnode.protocol.info.request;
 
 import org.epiccraft.dev.webnode.protocol.info.Request;
-import org.epiccraft.dev.webnode.structure.NodeGroup;
+import org.epiccraft.dev.webnode.structure.NodeInfo;
 
 /**
  * Project WebNode
@@ -9,7 +9,6 @@ import org.epiccraft.dev.webnode.structure.NodeGroup;
 public class HandshakeRequest extends Request {
 
     public String connectPassword;
-    public long nodeID;
-    public String nodeGroup;
+    public NodeInfo nodeInfo;
 
 }
