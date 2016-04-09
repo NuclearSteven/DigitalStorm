@@ -1,7 +1,7 @@
 package org.epiccraft.dev.webnode.protocol.info.request;
 
 import org.epiccraft.dev.webnode.protocol.info.Request;
-import org.epiccraft.dev.webnode.structure.NodeInfo;
+import org.epiccraft.dev.webnode.protocol.NodeInfo;
 
 /**
  * Project WebNode

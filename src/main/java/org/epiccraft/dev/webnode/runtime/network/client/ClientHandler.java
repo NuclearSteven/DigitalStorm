@@ -12,6 +12,7 @@ import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
 import org.epiccraft.dev.webnode.runtime.network.PacketHandler;
 import org.epiccraft.dev.webnode.structure.Node;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 /**
@@ -71,7 +72,11 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
                 shutdown(new UnknownException());
             }
             this.node = node;
-        }
+
+			for (InetSocketAddress nodeUnit : ((HandshakeReply) msg).nodeUnits) {
+				networkManager.connectToNewNode(nodeUnit);
+			}
+		}
 
 		ReferenceCountUtil.release(msg);
 	}

@@ -1,4 +1,4 @@
-package org.epiccraft.dev.webnode.structure;
+package org.epiccraft.dev.webnode.protocol;
 
 import java.util.UUID;
 
