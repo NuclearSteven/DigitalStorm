@@ -1,4 +1,5 @@
 language: java
 script:
   - jdk_switcher use oraclejdk8
-source: 8
+install:
+  - source 8
