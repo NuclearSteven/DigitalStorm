@@ -19,14 +19,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class NodeNetworkManager {
 
-    private WebNode node;
+    private WebNode server;
     private ServerSocket serverSocket;
     private List<ClientSocket> clientSockets;
     private ConcurrentHashMap<UUID, Node> nodeMap = new ConcurrentHashMap<>();
     private ChannelManager channelManager;
 
     public NodeNetworkManager(WebNode webNode) {
-        node = webNode;
+        server = webNode;
         initialize();
     }
 
@@ -34,12 +34,12 @@ public class NodeNetworkManager {
         this.channelManager = new ChannelManager(this);
 
         try {
-            serverSocket = new ServerSocket(this, node.getConfig().localNodeNetworkAddress, node.getConfig().SSL);
+            serverSocket = new ServerSocket(this, server.getConfig().localNodeNetworkAddress, server.getConfig().SSL);
             Thread.sleep(3000);
-            connectToNewNode(node.getConfig().interfaceNodeNetworkAddress);
+            connectToNewNode(server.getConfig().interfaceNodeNetworkAddress);
         } catch (Exception e) {
             e.printStackTrace();
-            node.getLogger().warning("Could not connect to network: " + e.getMessage());
+            server.getLogger().warning("Could not connect to network: " + e.getMessage());
         }
     }
 
@@ -55,20 +55,20 @@ public class NodeNetworkManager {
             throw new NodeAlreadyConnectedException();
         }
 
-        Node nodeUnit = new Node(this, nodeInfo.nodeUUID, nodeInfo.nodeGroup);
+        Node nodeUnit = new Node(this, nodeInfo.nodeUUID, nodeInfo.channels);
         nodeMap.put(nodeInfo.nodeUUID, nodeUnit);
         return nodeUnit;
     }
 
     public void connectToNewNode(InetSocketAddress address) {
-        connectToNewNode(address, node.getConfig().SSL);
+        connectToNewNode(address, server.getConfig().SSL);
     }
 
     public void connectToNewNode(InetSocketAddress address, boolean ssl) {
         try {
             clientSockets.add(new ClientSocket(this, address, ssl));
         } catch (Exception e) {
-            node.getLogger().info("Client socket failed to initialize: " + e.getLocalizedMessage());
+            server.getLogger().info("Client socket failed to initialize: " + e.getLocalizedMessage());
         }
     }
 
@@ -80,8 +80,8 @@ public class NodeNetworkManager {
         return clientSockets;
     }
 
-    public WebNode getNode() {
-        return node;
+    public WebNode getServer() {
+        return server;
     }
 
     public String getNetworkID(InetSocketAddress address) {
@@ -99,6 +99,10 @@ public class NodeNetworkManager {
             }
         }
         return null;
+    }
+
+    public ChannelManager getChannelManager() {
+        return channelManager;
     }
 
 }

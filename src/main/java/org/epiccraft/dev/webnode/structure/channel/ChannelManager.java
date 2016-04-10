@@ -22,4 +22,7 @@ public class ChannelManager {
         channels.add(new Channel(name));
     }
 
+    public Channel[] getChannels() {
+        return (Channel[]) channels.toArray();
+    }
 }

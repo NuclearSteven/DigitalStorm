@@ -1,13 +1,16 @@
 package org.epiccraft.dev.webnode.protocol;
 
+import org.epiccraft.dev.webnode.structure.channel.Channel;
+
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
  * Project WebNode
  */
-public class NodeInfo {
+public class NodeInfo implements Serializable {
 
     public UUID nodeUUID;
-    public String nodeGroup;
+    public Channel[] channels;
 
 }

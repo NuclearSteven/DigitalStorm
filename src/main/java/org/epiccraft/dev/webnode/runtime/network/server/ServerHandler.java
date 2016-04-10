@@ -39,7 +39,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     private void handlePacket(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof HandshakeRequest) {
             HandshakeReply reply = new HandshakeReply();
-            if (((HandshakeRequest) msg).connectPassword.equals(networkManager.getNode().getConfig().connectionPassword)) {
+            if (((HandshakeRequest) msg).connectPassword.equals(networkManager.getServer().getConfig().connectionPassword)) {
                 reply.authSuccess = true;
                 List<InetSocketAddress> list = new LinkedList<>();
                 networkManager.getNodeMap().forEach((aLong, node) -> {
@@ -56,7 +56,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
             try {
                 networkManager.newNodeConnected(((HandshakeRequest) msg).nodeInfo).bindHandler(this);
             } catch (NodeAlreadyConnectedException e) {
-                networkManager.getNode().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
+                networkManager.getServer().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
                 ctx.close();
             }
         }
@@ -71,13 +71,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        networkManager.getNode().getLogger().warning("Connection error caught: " + cause.getLocalizedMessage());
+        networkManager.getServer().getLogger().warning("Connection error caught: " + cause.getLocalizedMessage());
         ctx.close();
     }
 
     @Override
     public void shutdown(Exception e) {
-        networkManager.getNode().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
+        networkManager.getServer().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
     }
 
 }

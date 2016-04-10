@@ -13,7 +13,7 @@ import java.util.List;
 public class Channel implements Serializable {
 
     private String name;
-    private List<Node> joinedNode;
+    private transient List<Node> joinedNode;
 
     public Channel(String name) {
         this.name = name;

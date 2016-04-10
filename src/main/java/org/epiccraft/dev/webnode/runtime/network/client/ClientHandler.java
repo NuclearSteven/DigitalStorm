@@ -38,8 +38,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 	{
 		HandshakeRequest handshakeRequest = new HandshakeRequest();
 		handshakeRequest.nodeInfo.nodeUUID = UUID.randomUUID();
-		handshakeRequest.connectPassword = networkManager.getNode().getConfig().connectionPassword;
-		handshakeRequest.nodeInfo.nodeGroup = networkManager.getNode().getConfig().nodeGroup;
+		handshakeRequest.connectPassword = networkManager.getServer().getConfig().connectionPassword;
+		handshakeRequest.nodeInfo.channels = networkManager.getChannelManager().getChannels();
 		ctx.write(handshakeRequest);
 		ctx.flush();
 
@@ -54,7 +54,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 	private void handlePacket(ChannelHandlerContext ctx, Object msg) {
 		if (msg instanceof HandshakeReply) {
 			if (!((HandshakeReply) msg).authSuccess) {
-				networkManager.getNode().getLogger().warning("Node auth failed: " + ctx.channel().remoteAddress());
+				networkManager.getServer().getLogger().warning("Node auth failed: " + ctx.channel().remoteAddress());
                 ctx.close();
                 socketChannel.close();
                 return;
@@ -64,7 +64,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
             try {
                 node = networkManager.newNodeConnected(((HandshakeReply) msg).nodeInfo).bindHandler(this);
             } catch (NodeAlreadyConnectedException e) {
-                networkManager.getNode().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
+                networkManager.getServer().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
                 ctx.close();
                 socketChannel.close();
             }
@@ -96,7 +96,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 
     @Override
     public void shutdown(Exception e) {
-        networkManager.getNode().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
+        networkManager.getServer().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
         socketChannel.close();
     }
 
