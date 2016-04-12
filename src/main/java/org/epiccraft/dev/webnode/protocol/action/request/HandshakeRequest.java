@@ -1,6 +1,6 @@
-package org.epiccraft.dev.webnode.protocol.info.request;
+package org.epiccraft.dev.webnode.protocol.action.request;
 
-import org.epiccraft.dev.webnode.protocol.info.Request;
+import org.epiccraft.dev.webnode.protocol.action.Request;
 import org.epiccraft.dev.webnode.protocol.NodeInfo;
 
 /**

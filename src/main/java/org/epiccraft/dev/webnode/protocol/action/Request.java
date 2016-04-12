@@ -1,4 +1,4 @@
-package org.epiccraft.dev.webnode.protocol.info;
+package org.epiccraft.dev.webnode.protocol.action;
 
 import org.epiccraft.dev.webnode.protocol.Packet;
 

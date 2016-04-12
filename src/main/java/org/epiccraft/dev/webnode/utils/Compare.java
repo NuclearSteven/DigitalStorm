@@ -5,5 +5,4 @@ package org.epiccraft.dev.webnode.utils;
  */
 public class Compare {
 
-
 }
