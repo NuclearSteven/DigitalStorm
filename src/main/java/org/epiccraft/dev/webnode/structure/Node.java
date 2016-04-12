@@ -5,12 +5,13 @@ import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
 import org.epiccraft.dev.webnode.runtime.network.PacketHandler;
 import org.epiccraft.dev.webnode.structure.channel.Channel;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
  * Project WebNode
  */
-public class Node implements NodeUnit {
+public class Node implements NodeUnit, Serializable {
 
     private NodeNetworkManager networkManager;
     public UUID id;
@@ -21,6 +22,13 @@ public class Node implements NodeUnit {
         this.networkManager = nodeNetworkManager;
         this.id = nid;
         channels = nodeGroup;
+        init();
+    }
+
+    private void init() {
+        for (Channel channel : channels) {
+            networkManager.getChannelManager().joinChannel(channel, this);
+        }
     }
 
     public Node bindHandler(PacketHandler handler) {

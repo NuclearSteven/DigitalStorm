@@ -13,25 +13,40 @@ import java.util.List;
 public class Channel implements Serializable {
 
     private String name;
-    private transient List<Node> joinedNode;
+    private transient List<Node> joinedNodes;
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Node> getJoinedNode() {
+        return joinedNodes;
+    }
 
     public Channel(String name) {
         this.name = name;
-        joinedNode = new LinkedList<>();
+        joinedNodes = new LinkedList<>();
     }
 
     public void broadcast(Packet packet) {
-        for (Node node : joinedNode) {
+        for (Node node : joinedNodes) {
             node.sendPacket(packet);
         }
     }
 
     public void broadcast(Packet packet, Class type) {
-        for (Node node : joinedNode) {
-            if (node.getClass().getName().equals(type.getName())) {
-                node.sendPacket(packet);
+        joinedNodes.stream().filter(node -> node.getClass().getName().equals(type.getName())).forEach(node -> {
+            node.sendPacket(packet);
+        });
+    }
+
+    public void join(Node node) {
+        for (Node node1 : joinedNodes) {
+            if (node1.getId().equals(node)) {
+                return;
             }
         }
+        joinedNodes.add(node);
     }
 
 }
