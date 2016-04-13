@@ -1,6 +1,7 @@
 package org.epiccraft.dev.webnode.structure.channel;
 
 import org.epiccraft.dev.webnode.protocol.Packet;
+import org.epiccraft.dev.webnode.protocol.data.ChannelPacket;
 import org.epiccraft.dev.webnode.structure.Node;
 
 import java.io.Serializable;
@@ -30,13 +31,19 @@ public class Channel implements Serializable {
 
     public void broadcast(Packet packet) {
         for (Node node : joinedNodes) {
-            node.sendPacket(packet);
+            ChannelPacket channelPacket = new ChannelPacket();
+            channelPacket.channel = this;
+            channelPacket.msg = packet;
+            node.sendPacket(channelPacket);
         }
     }
 
     public void broadcast(Packet packet, Class type) {
         joinedNodes.stream().filter(node -> node.getClass().getName().equals(type.getName())).forEach(node -> {
-            node.sendPacket(packet);
+            ChannelPacket channelPacket = new ChannelPacket();
+            channelPacket.channel = this;
+            channelPacket.msg = packet;
+            node.sendPacket(channelPacket);
         });
     }
 
