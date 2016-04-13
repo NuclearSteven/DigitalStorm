@@ -17,6 +17,7 @@ public class ChannelManager {
     public ChannelManager(NodeNetworkManager nodeNetworkManager) {
         networkManager = nodeNetworkManager;
         channels = new LinkedList<>();
+        channels.add(new SystemNetworkingChannel());
     }
 
     public void joinChannel(String name, Node node) {
@@ -40,5 +41,9 @@ public class ChannelManager {
 
     public Channel[] getChannels() {
         return (Channel[]) channels.toArray();
+    }
+
+    public SystemNetworkingChannel getSystemChannel() {
+        return (SystemNetworkingChannel) channels.get(0);
     }
 }

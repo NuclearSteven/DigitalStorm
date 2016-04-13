@@ -10,13 +10,19 @@ import java.util.logging.Logger;
  */
 public class WebNode {
 
+    private static WebNode instance;
     private Logger logger;
     private NodeConfig config;
     private NodeNetworkManager networkManager;
 
     public WebNode(NodeConfig nodeConfig) {
+        instance = this;
         config = nodeConfig;
         initialize();
+    }
+
+    public static WebNode getInstance() {
+        return instance;
     }
 
     private void initialize() {
