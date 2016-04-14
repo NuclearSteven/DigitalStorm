@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
+import org.epiccraft.dev.webnode.protocol.NodeInfo;
 import org.epiccraft.dev.webnode.protocol.action.reply.HandshakeReply;
 import org.epiccraft.dev.webnode.protocol.action.request.HandshakeRequest;
 import org.epiccraft.dev.webnode.runtime.exception.NodeAlreadyConnectedException;
@@ -37,12 +38,12 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
 		HandshakeRequest handshakeRequest = new HandshakeRequest();
+		handshakeRequest.nodeInfo = new NodeInfo();
 		handshakeRequest.nodeInfo.nodeUUID = UUID.randomUUID();
-		handshakeRequest.connectPassword = networkManager.getServer().getConfig().connectionPassword;
 		handshakeRequest.nodeInfo.channels = networkManager.getChannelManager().getLocalChannels();
+		handshakeRequest.connectPassword = networkManager.getServer().getConfig().connectionPassword;
 		ctx.write(handshakeRequest);
 		ctx.flush();
-
 	}
 
 	@Override
@@ -58,6 +59,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
                 ctx.close();
                 socketChannel.close();
                 return;
+			} else {
+				networkManager.getServer().getLogger().info("Successfully started connection.");
 			}
 
             Node node = null;
@@ -74,7 +77,9 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
             this.node = node;
 
 			for (InetSocketAddress nodeUnit : ((HandshakeReply) msg).nodeUnits) {
+				networkManager.getServer().getLogger().info("Connecting to " + nodeUnit.getAddress() + "...");
 				networkManager.connectToNewNode(nodeUnit);
+				networkManager.getServer().getLogger().info("Succeed!");
 			}
 		}
 

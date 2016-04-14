@@ -56,7 +56,15 @@ public class ChannelManager {
                 }
             }
         }
-        return (Channel[]) localChannels.toArray();
+        return toChannelArray(localChannels);
+    }
+
+    public Channel[] toChannelArray(List<Channel> channels) {
+        Channel[] channelArray = new Channel[channels.size()];
+        for (int i = 0; i < channels.size(); i++) {
+            channelArray[i] = channels.get(i);
+        }
+        return channelArray;
     }
 
 }

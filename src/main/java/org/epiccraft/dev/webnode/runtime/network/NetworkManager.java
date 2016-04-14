@@ -43,12 +43,15 @@ public class NetworkManager {
 
     private void initialize() {
         this.channelManager = new ChannelManager(this);
-        for (Channel channel : server.getConfig().channels) {
-            channelManager.joinChannel(channel, LocalMachine.getInstance());
+        clientSockets = new LinkedList<>();
+        if (server.getConfig().channels != null && server.getConfig().channels.length != 0) {
+            for (Channel channel : server.getConfig().channels) {
+                channelManager.joinChannel(channel, LocalMachine.getInstance());
+            }
         }
 
         try {
-            serverSocket = new ServerSocket(this, server.getConfig().localNodeNetworkAddress, server.getConfig().SSL);
+            //serverSocket = new ServerSocket(this, server.getConfig().localNodeNetworkAddress, server.getConfig().SSL);
             Thread.sleep(3000);
             connectToNewNode(server.getConfig().interfaceNodeNetworkAddress);
         } catch (Exception e) {
@@ -82,6 +85,7 @@ public class NetworkManager {
         try {
             clientSockets.add(new ClientSocket(this, address, ssl));
         } catch (Exception e) {
+            e.printStackTrace();
             server.getLogger().info("Client socket failed to initialize: " + e.getLocalizedMessage());
         }
     }

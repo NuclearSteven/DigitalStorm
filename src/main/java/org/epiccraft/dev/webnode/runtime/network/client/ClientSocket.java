@@ -54,7 +54,7 @@ public class ClientSocket {
                             p.addLast(
                                     new ObjectEncoder(),
                                     new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                    newClientHandler(ch.remoteAddress(), ch)//// TODO: 4/5/2016 Check needed
+                                    newClientHandler(address, ch)//// TODO: 4/5/2016 Check needed
                             );
                         }
                     });

@@ -47,7 +47,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 List<InetSocketAddress> list = new LinkedList<>();
                 networkManager.getNodeMap().forEach((aLong, node) -> {
                     if (!node.getHandler().getSocketChannel().remoteAddress().equals(socketChannel.remoteAddress())) {
-                        list.add(node.getHandler().getSocketChannel().remoteAddress());
+                        list.add(node.getHandler().getSocketChannel().remoteAddress());//// TODO: 4/14/2016 fix this 
                     }
                 });
                 reply.nodeUnits = list;
@@ -81,6 +81,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
         networkManager.getServer().getLogger().warning("Connection error caught: " + cause.getLocalizedMessage());
         ctx.close();
     }
