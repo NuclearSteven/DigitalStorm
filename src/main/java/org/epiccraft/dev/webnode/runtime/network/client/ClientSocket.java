@@ -14,7 +14,7 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
+import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,11 +24,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ClientSocket {
 
-    private NodeNetworkManager networkManager;
+    private NetworkManager networkManager;
     private ChannelFuture channelFuture;
     private ConcurrentHashMap<String, ClientHandler> clientHandlers = new ConcurrentHashMap<>();
 
-    public ClientSocket(final NodeNetworkManager nodeNetworkManager, final InetSocketAddress address, boolean ssl) throws Exception {
+    public ClientSocket(final NetworkManager nodeNetworkManager, final InetSocketAddress address, boolean ssl) throws Exception {
         this.networkManager = nodeNetworkManager;
 
         final SslContext sslCtx;

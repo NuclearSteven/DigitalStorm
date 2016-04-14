@@ -1,14 +1,19 @@
 package org.epiccraft.dev.webnode.runtime.network;
 
 import org.epiccraft.dev.webnode.WebNode;
+import org.epiccraft.dev.webnode.protocol.NodeInfo;
+import org.epiccraft.dev.webnode.protocol.Packet;
+import org.epiccraft.dev.webnode.protocol.data.ChannelPacket;
 import org.epiccraft.dev.webnode.runtime.exception.NodeAlreadyConnectedException;
 import org.epiccraft.dev.webnode.runtime.network.client.ClientSocket;
+import org.epiccraft.dev.webnode.runtime.network.handler.NetworkHandler;
+import org.epiccraft.dev.webnode.runtime.network.server.ServerHandler;
 import org.epiccraft.dev.webnode.runtime.network.server.ServerSocket;
 import org.epiccraft.dev.webnode.structure.Node;
-import org.epiccraft.dev.webnode.protocol.NodeInfo;
 import org.epiccraft.dev.webnode.structure.channel.ChannelManager;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,17 +22,21 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Project WebNode
  */
-public class NodeNetworkManager {
+public class NetworkManager {
 
     private WebNode server;
     private ServerSocket serverSocket;
     private List<ClientSocket> clientSockets;
     private ConcurrentHashMap<UUID, Node> nodeMap = new ConcurrentHashMap<>();
     private ChannelManager channelManager;
+    private List<NetworkHandler> networkHandlers;
 
-    public NodeNetworkManager(WebNode webNode) {
+    public NetworkManager(WebNode webNode) {
         server = webNode;
         initialize();
+
+        clientSockets = new LinkedList<>();
+        networkHandlers = new LinkedList<>();
     }
 
     private void initialize() {
@@ -71,6 +80,30 @@ public class NodeNetworkManager {
             server.getLogger().info("Client socket failed to initialize: " + e.getLocalizedMessage());
         }
     }
+
+    public void registerPacketHandler(NetworkHandler packetHandler) {
+        networkHandlers.add(packetHandler);
+    }
+
+    public void packetReceived(Packet msg, ServerHandler serverHandler) {
+        for (NetworkHandler networkHandler : networkHandlers) {
+            for (Map.Entry<UUID, Node> uuidNodeEntry : nodeMap.entrySet()) {
+                if (uuidNodeEntry.getValue().getHandler().equals(serverHandler)) {
+                    msg.setSender(uuidNodeEntry.getValue());
+                }
+            }
+
+            if (networkHandler.getInterests().includeInterest(msg)) {
+                if (msg instanceof ChannelPacket) {
+                    networkHandler.channelPacketReceived((ChannelPacket) msg);
+                } else {
+                    networkHandler.packetReceived(msg);
+                }
+            }
+        }
+    }
+
+    //Getters
 
     public ServerSocket getServerSocket() {
         return serverSocket;

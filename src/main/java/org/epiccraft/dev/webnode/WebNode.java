@@ -1,7 +1,7 @@
 package org.epiccraft.dev.webnode;
 
 import org.epiccraft.dev.webnode.runtime.exception.ConfigInvalidException;
-import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
+import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
 
 import java.util.logging.Logger;
 
@@ -13,7 +13,7 @@ public class WebNode {
     private static WebNode instance;
     private Logger logger;
     private NodeConfig config;
-    private NodeNetworkManager networkManager;
+    private NetworkManager networkManager;
 
     public WebNode(NodeConfig nodeConfig) {
         instance = this;
@@ -21,12 +21,8 @@ public class WebNode {
         initialize();
     }
 
-    public static WebNode getInstance() {
-        return instance;
-    }
-
     private void initialize() {
-        networkManager = new NodeNetworkManager(this);
+        networkManager = new NetworkManager(this);
     }
 
     public static WebNode create(NodeConfig nodeConfig) throws ConfigInvalidException {
@@ -51,8 +47,12 @@ public class WebNode {
         return logger;
     }
 
-    public NodeNetworkManager getNetworkManager() {
+    public NetworkManager getNetworkManager() {
         return networkManager;
+    }
+
+    public static WebNode getInstance() {
+        return instance;
     }
 
 }

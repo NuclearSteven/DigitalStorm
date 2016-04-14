@@ -4,10 +4,11 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
+import org.epiccraft.dev.webnode.protocol.Packet;
 import org.epiccraft.dev.webnode.protocol.action.reply.HandshakeReply;
 import org.epiccraft.dev.webnode.protocol.action.request.HandshakeRequest;
 import org.epiccraft.dev.webnode.runtime.exception.NodeAlreadyConnectedException;
-import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
+import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
 import org.epiccraft.dev.webnode.runtime.network.PacketHandler;
 
 import java.net.InetSocketAddress;
@@ -20,9 +21,9 @@ import java.util.List;
 public class ServerHandler extends ChannelInboundHandlerAdapter implements PacketHandler {
 
     private SocketChannel socketChannel;
-    private NodeNetworkManager networkManager;
+    private NetworkManager networkManager;
 
-    public ServerHandler(NodeNetworkManager networkManager, SocketChannel ch) {
+    public ServerHandler(NetworkManager networkManager, SocketChannel ch) {
         this.networkManager = networkManager;
         this.socketChannel = ch;
     }
@@ -52,12 +53,16 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 reply.authSuccess = false;
             }
             ctx.write(msg);
-            
+
             try {
                 networkManager.newNodeConnected(((HandshakeRequest) msg).nodeInfo).bindHandler(this);
             } catch (NodeAlreadyConnectedException e) {
                 networkManager.getServer().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
                 ctx.close();
+            }
+        } else {
+            if (msg instanceof Packet) {
+                networkManager.packetReceived((Packet) msg, this);
             }
         }
 

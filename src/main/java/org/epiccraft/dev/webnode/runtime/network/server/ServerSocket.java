@@ -13,7 +13,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
-import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
+import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ServerSocket {
 
-    private NodeNetworkManager networkManager;
+    private NetworkManager networkManager;
     private ChannelFuture channelFuture;
     private ConcurrentHashMap<String, ServerHandler> serverHandlers = new ConcurrentHashMap<>();
 
@@ -31,7 +31,7 @@ public class ServerSocket {
         return channelFuture;
     }
 
-    public ServerSocket(final NodeNetworkManager nodeNetworkManager, InetSocketAddress localAddr, boolean ssl) throws Exception {
+    public ServerSocket(final NetworkManager nodeNetworkManager, InetSocketAddress localAddr, boolean ssl) throws Exception {
         networkManager = nodeNetworkManager;
 
         final SslContext sslCtx;

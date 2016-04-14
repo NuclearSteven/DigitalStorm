@@ -1,7 +1,7 @@
 package org.epiccraft.dev.webnode.structure;
 
 import org.epiccraft.dev.webnode.protocol.Packet;
-import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
+import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
 import org.epiccraft.dev.webnode.runtime.network.PacketHandler;
 import org.epiccraft.dev.webnode.structure.channel.Channel;
 
@@ -13,12 +13,12 @@ import java.util.UUID;
  */
 public class Node implements NodeUnit, Serializable {
 
-    private NodeNetworkManager networkManager;
+    private NetworkManager networkManager;
     public UUID id;
     private PacketHandler handler;
     private Channel[] channels;
 
-    public Node(NodeNetworkManager nodeNetworkManager, UUID nid, Channel[] nodeGroup) {
+    public Node(NetworkManager nodeNetworkManager, UUID nid, Channel[] nodeGroup) {
         this.networkManager = nodeNetworkManager;
         this.id = nid;
         channels = nodeGroup;

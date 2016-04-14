@@ -8,7 +8,7 @@ import org.epiccraft.dev.webnode.protocol.action.reply.HandshakeReply;
 import org.epiccraft.dev.webnode.protocol.action.request.HandshakeRequest;
 import org.epiccraft.dev.webnode.runtime.exception.NodeAlreadyConnectedException;
 import org.epiccraft.dev.webnode.runtime.exception.UnknownException;
-import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
+import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
 import org.epiccraft.dev.webnode.runtime.network.PacketHandler;
 import org.epiccraft.dev.webnode.structure.Node;
 
@@ -21,10 +21,10 @@ import java.util.UUID;
 public class ClientHandler extends ChannelInboundHandlerAdapter implements PacketHandler {
 
 	private SocketChannel socketChannel;
-	private NodeNetworkManager networkManager;
+	private NetworkManager networkManager;
     private Node node;
 
-    public ClientHandler(NodeNetworkManager nodeNetworkManager, SocketChannel ch) {
+    public ClientHandler(NetworkManager nodeNetworkManager, SocketChannel ch) {
         this.networkManager = nodeNetworkManager;
 		this.socketChannel = ch;
     }

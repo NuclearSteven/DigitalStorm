@@ -1,6 +1,6 @@
 package org.epiccraft.dev.webnode.structure.channel;
 
-import org.epiccraft.dev.webnode.runtime.network.NodeNetworkManager;
+import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
 import org.epiccraft.dev.webnode.structure.Node;
 
 import java.util.LinkedList;
@@ -11,10 +11,10 @@ import java.util.List;
  */
 public class ChannelManager {
 
-    private NodeNetworkManager networkManager;
+    private NetworkManager networkManager;
     private List<Channel> channels;
 
-    public ChannelManager(NodeNetworkManager nodeNetworkManager) {
+    public ChannelManager(NetworkManager nodeNetworkManager) {
         networkManager = nodeNetworkManager;
         channels = new LinkedList<>();
         channels.add(new SystemNetworkingChannel());
