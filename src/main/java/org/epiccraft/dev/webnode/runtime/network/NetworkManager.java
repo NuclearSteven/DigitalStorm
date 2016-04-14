@@ -3,14 +3,16 @@ package org.epiccraft.dev.webnode.runtime.network;
 import org.epiccraft.dev.webnode.WebNode;
 import org.epiccraft.dev.webnode.protocol.NodeInfo;
 import org.epiccraft.dev.webnode.protocol.Packet;
-import org.epiccraft.dev.webnode.protocol.data.ChannelPacket;
+import org.epiccraft.dev.webnode.protocol.channel.ChannelDataPacket;
 import org.epiccraft.dev.webnode.runtime.exception.NodeAlreadyConnectedException;
 import org.epiccraft.dev.webnode.runtime.network.client.ClientSocket;
 import org.epiccraft.dev.webnode.runtime.network.handler.NetworkHandler;
 import org.epiccraft.dev.webnode.runtime.network.server.ServerHandler;
 import org.epiccraft.dev.webnode.runtime.network.server.ServerSocket;
 import org.epiccraft.dev.webnode.structure.Node;
+import org.epiccraft.dev.webnode.structure.channel.Channel;
 import org.epiccraft.dev.webnode.structure.channel.ChannelManager;
+import org.epiccraft.dev.webnode.structure.channel.LocalMachine;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
@@ -41,6 +43,9 @@ public class NetworkManager {
 
     private void initialize() {
         this.channelManager = new ChannelManager(this);
+        for (Channel channel : server.getConfig().channels) {
+            channelManager.joinChannel(channel, LocalMachine.getInstance());
+        }
 
         try {
             serverSocket = new ServerSocket(this, server.getConfig().localNodeNetworkAddress, server.getConfig().SSL);
@@ -94,8 +99,8 @@ public class NetworkManager {
             }
 
             if (networkHandler.getInterests().includeInterest(msg)) {
-                if (msg instanceof ChannelPacket) {
-                    networkHandler.channelPacketReceived((ChannelPacket) msg);
+                if (msg instanceof ChannelDataPacket) {
+                    networkHandler.channelPacketReceived((ChannelDataPacket) msg);
                 } else {
                     networkHandler.packetReceived(msg);
                 }

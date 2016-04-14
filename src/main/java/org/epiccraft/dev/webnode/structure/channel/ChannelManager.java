@@ -1,7 +1,6 @@
 package org.epiccraft.dev.webnode.structure.channel;
 
 import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
-import org.epiccraft.dev.webnode.structure.Node;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +19,7 @@ public class ChannelManager {
         channels.add(new SystemNetworkingChannel());
     }
 
-    public void joinChannel(String name, Node node) {
+    public void joinChannel(String name, ChannelMember node) {
         for (Channel channel : channels) {
             if (channel.getName().equals(name)) {
                 channel.join(node);
@@ -28,7 +27,7 @@ public class ChannelManager {
         }
     }
 
-    public void joinChannel(Channel channel, Node node) {
+    public void joinChannel(Channel channel, ChannelMember node) {
         for (Channel c : channels) {
             if (channel.getName().equals(c.getName())) {
                 c.join(node);
@@ -46,4 +45,18 @@ public class ChannelManager {
     public SystemNetworkingChannel getSystemChannel() {
         return (SystemNetworkingChannel) channels.get(0);
     }
+
+    public Channel[] getLocalChannels() {
+        List<Channel> localChannels = new LinkedList<>();
+
+        for (Channel channel : channels) {
+            for (ChannelMember channelMember : channel.getJoinedNode()) {
+                if (channelMember instanceof LocalMachine) {
+                    localChannels.add(channel);
+                }
+            }
+        }
+        return (Channel[]) localChannels.toArray();
+    }
+
 }

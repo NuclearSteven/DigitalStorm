@@ -1,5 +1,7 @@
 package org.epiccraft.dev.webnode;
 
+import org.epiccraft.dev.webnode.structure.channel.Channel;
+
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 
@@ -27,7 +29,7 @@ public class NodeConfig {
     /**
      * Node group
      */
-    public String nodeGroup = null;
+    public Channel[] channels;
 
     /**
      * Secured connection.

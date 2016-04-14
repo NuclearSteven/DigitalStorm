@@ -39,7 +39,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 		HandshakeRequest handshakeRequest = new HandshakeRequest();
 		handshakeRequest.nodeInfo.nodeUUID = UUID.randomUUID();
 		handshakeRequest.connectPassword = networkManager.getServer().getConfig().connectionPassword;
-		handshakeRequest.nodeInfo.channels = networkManager.getChannelManager().getChannels();
+		handshakeRequest.nodeInfo.channels = networkManager.getChannelManager().getLocalChannels();
 		ctx.write(handshakeRequest);
 		ctx.flush();
 

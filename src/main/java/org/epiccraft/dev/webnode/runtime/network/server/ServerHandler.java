@@ -4,12 +4,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
+import org.epiccraft.dev.webnode.protocol.NodeInfo;
 import org.epiccraft.dev.webnode.protocol.Packet;
 import org.epiccraft.dev.webnode.protocol.action.reply.HandshakeReply;
 import org.epiccraft.dev.webnode.protocol.action.request.HandshakeRequest;
 import org.epiccraft.dev.webnode.runtime.exception.NodeAlreadyConnectedException;
 import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
 import org.epiccraft.dev.webnode.runtime.network.PacketHandler;
+import org.epiccraft.dev.webnode.structure.channel.LocalMachine;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
@@ -49,10 +51,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                     }
                 });
                 reply.nodeUnits = list;
+                reply.nodeInfo = new NodeInfo();
+                reply.nodeInfo.channels = networkManager.getChannelManager().getLocalChannels();
+                reply.nodeInfo.nodeUUID = LocalMachine.getInstance().getId();
             } else {
                 reply.authSuccess = false;
             }
-            ctx.write(msg);
+            ctx.write(reply);
 
             try {
                 networkManager.newNodeConnected(((HandshakeRequest) msg).nodeInfo).bindHandler(this);

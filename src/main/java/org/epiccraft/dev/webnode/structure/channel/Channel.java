@@ -1,8 +1,7 @@
 package org.epiccraft.dev.webnode.structure.channel;
 
 import org.epiccraft.dev.webnode.protocol.Packet;
-import org.epiccraft.dev.webnode.protocol.data.ChannelPacket;
-import org.epiccraft.dev.webnode.structure.Node;
+import org.epiccraft.dev.webnode.protocol.channel.ChannelDataPacket;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -14,13 +13,13 @@ import java.util.List;
 public class Channel implements Serializable {
 
     private String name;
-    private transient List<Node> joinedNodes;
+    private transient List<ChannelMember> joinedNodes;
 
     public String getName() {
         return name;
     }
 
-    public List<Node> getJoinedNode() {
+    public List<ChannelMember> getJoinedNode() {
         return joinedNodes;
     }
 
@@ -30,25 +29,25 @@ public class Channel implements Serializable {
     }
 
     public void broadcast(Packet packet) {
-        for (Node node : joinedNodes) {
-            ChannelPacket channelPacket = new ChannelPacket();
-            channelPacket.channel = this;
-            channelPacket.msg = packet;
-            node.sendPacket(channelPacket);
+        for (ChannelMember node : joinedNodes) {
+            ChannelDataPacket channelDataPacket = new ChannelDataPacket();
+            channelDataPacket.channel = this;
+            channelDataPacket.msg = packet;
+            node.sendPacket(channelDataPacket);
         }
     }
 
     public void broadcast(Packet packet, Class type) {
         joinedNodes.stream().filter(node -> node.getClass().getName().equals(type.getName())).forEach(node -> {
-            ChannelPacket channelPacket = new ChannelPacket();
-            channelPacket.channel = this;
-            channelPacket.msg = packet;
-            node.sendPacket(channelPacket);
+            ChannelDataPacket channelDataPacket = new ChannelDataPacket();
+            channelDataPacket.channel = this;
+            channelDataPacket.msg = packet;
+            node.sendPacket(channelDataPacket);
         });
     }
 
-    public void join(Node node) {
-        for (Node node1 : joinedNodes) {
+    public void join(ChannelMember node) {
+        for (ChannelMember node1 : joinedNodes) {
             if (node1.getId().equals(node)) {
                 return;
             }

@@ -1,12 +1,11 @@
-package org.epiccraft.dev.webnode.protocol.data;
+package org.epiccraft.dev.webnode.protocol.channel;
 
-import org.epiccraft.dev.webnode.protocol.Packet;
 import org.epiccraft.dev.webnode.structure.channel.Channel;
 
 /**
  * Project WebNode
  */
-public class ChannelPacket extends Packet {
+public class ChannelDataPacket extends ChannelPacket {
 
     public Channel channel;
     public Object msg;
