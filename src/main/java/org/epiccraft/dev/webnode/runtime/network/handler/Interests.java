@@ -1,5 +1,6 @@
 package org.epiccraft.dev.webnode.runtime.network.handler;
 
+import org.epiccraft.dev.webnode.event.Event;
 import org.epiccraft.dev.webnode.protocol.Packet;
 import org.epiccraft.dev.webnode.structure.Node;
 import org.epiccraft.dev.webnode.structure.channel.Channel;
@@ -19,6 +20,7 @@ public class Interests {
     private List<InetSocketAddress> nodeAddresses;
     private List<Channel> channels;
     private List<Class<? extends Packet>> packets;
+    private List<Class<? extends Event>> events;
 
     public Interests() {
         nodeUUIDs = new LinkedList<>();
@@ -26,6 +28,7 @@ public class Interests {
         nodes = new LinkedList<>();
         channels = new LinkedList<>();
         packets = new LinkedList<>();
+        events = new LinkedList<>();
     }
 
     public void addInterest(Object o) {
@@ -41,10 +44,12 @@ public class Interests {
             if (((Class) o).isAssignableFrom(Packet.class)) {
                 packets.add((Class<? extends Packet>) o);
             }
+            if (((Class) o).isAssignableFrom(Event.class)) {
+                events.add((Class<? extends Event>) o);
+            }
         }
     }
 
-    @SuppressWarnings("")
     public void deleteInterest(Object o) {
         try {
             for (UUID nodeUUID : nodeUUIDs) {
@@ -60,6 +65,7 @@ public class Interests {
             }
             channels.remove(o);
             packets.remove(o);
+            events.remove(o);
         } catch (Exception e) {
 
         }
@@ -84,6 +90,9 @@ public class Interests {
                 return true;
             }
             if (packets.contains(o)) {
+                return true;
+            }
+            if (events.contains(o)) {
                 return true;
             }
         } catch (Exception e) {

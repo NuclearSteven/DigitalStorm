@@ -46,6 +46,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 reply.authSuccess = true;
                 List<InetSocketAddress> list = new LinkedList<>();
                 networkManager.getNodeMap().forEach((aLong, node) -> {
+                    System.out.println(node.getHandler().getSocketChannel().remoteAddress());
                     if (!node.getHandler().getSocketChannel().remoteAddress().equals(socketChannel.remoteAddress())) {
                         list.add(node.getHandler().getSocketChannel().remoteAddress());//// TODO: 4/14/2016 fix this 
                     }
@@ -84,6 +85,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
         cause.printStackTrace();
         networkManager.getServer().getLogger().warning("Connection error caught: " + cause.getLocalizedMessage());
         ctx.close();
+
+        networkManager.nodeDisconnected(ctx.channel().remoteAddress());
     }
 
     @Override

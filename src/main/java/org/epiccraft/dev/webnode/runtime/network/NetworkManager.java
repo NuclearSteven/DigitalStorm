@@ -1,6 +1,8 @@
 package org.epiccraft.dev.webnode.runtime.network;
 
 import org.epiccraft.dev.webnode.WebNode;
+import org.epiccraft.dev.webnode.event.Event;
+import org.epiccraft.dev.webnode.event.RawClientDisconnectEvent;
 import org.epiccraft.dev.webnode.protocol.NodeInfo;
 import org.epiccraft.dev.webnode.protocol.Packet;
 import org.epiccraft.dev.webnode.protocol.channel.ChannelDataPacket;
@@ -15,6 +17,7 @@ import org.epiccraft.dev.webnode.structure.channel.ChannelManager;
 import org.epiccraft.dev.webnode.structure.channel.LocalMachine;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +80,14 @@ public class NetworkManager {
         return nodeUnit;
     }
 
+    public void nodeDisconnected(SocketAddress socketAddress) {
+        if (nodeMap.contains(socketAddress)) {
+            nodeMap.remove(socketAddress);
+        }
+
+        eventCaused(new RawClientDisconnectEvent(socketAddress));
+    }
+
     public void connectToNewNode(InetSocketAddress address) {
         connectToNewNode(address, server.getConfig().SSL);
     }
@@ -102,13 +113,21 @@ public class NetworkManager {
                 }
             }
 
-            if (networkHandler.getInterests().includeInterest(msg)) {
+            if (networkHandler.getInterests().includeInterest(msg.getClass())) {
                 if (msg instanceof ChannelDataPacket) {
                     networkHandler.channelPacketReceived((ChannelDataPacket) msg);
                 } else {
                     networkHandler.packetReceived(msg);
                 }
             }
+        }
+    }
+
+    public void eventCaused(Event event) {
+        for (NetworkHandler networkHandler : networkHandlers) {
+            nodeMap.entrySet().stream().filter(uuidNodeEntry -> networkHandler.getInterests().includeInterest(event.getClass())).forEach(uuidNodeEntry -> {
+                networkHandler.onEvent(event);
+            });
         }
     }
 

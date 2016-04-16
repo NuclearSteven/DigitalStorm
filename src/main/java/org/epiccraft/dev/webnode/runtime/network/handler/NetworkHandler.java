@@ -1,5 +1,6 @@
 package org.epiccraft.dev.webnode.runtime.network.handler;
 
+import org.epiccraft.dev.webnode.event.Event;
 import org.epiccraft.dev.webnode.protocol.Packet;
 import org.epiccraft.dev.webnode.protocol.channel.ChannelDataPacket;
 
@@ -13,6 +14,8 @@ public abstract class NetworkHandler {
     public abstract void channelPacketReceived(ChannelDataPacket channelDataPacket);
 
     public abstract void exceptionCaught(Exception e);
+
+    public abstract void onEvent(Event event);
 
     public abstract Interests getInterests();
 
