@@ -1,5 +1,6 @@
 package org.epiccraft.dev.webnode;
 
+import org.epiccraft.dev.webnode.event.EventFactory;
 import org.epiccraft.dev.webnode.runtime.exception.ConfigInvalidException;
 import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
 
@@ -15,6 +16,8 @@ public class WebNode {
     private NodeConfig config;
     private NetworkManager networkManager;
 
+    private EventFactory eventFactory;
+
     public WebNode(NodeConfig nodeConfig) {
         instance = this;
         config = nodeConfig;
@@ -23,6 +26,7 @@ public class WebNode {
 
     private void initialize() {
         networkManager = new NetworkManager(this);
+        eventFactory = new EventFactory(networkManager);
     }
 
     public static WebNode create(NodeConfig nodeConfig) throws ConfigInvalidException {
@@ -53,6 +57,10 @@ public class WebNode {
 
     public static WebNode getInstance() {
         return instance;
+    }
+
+    public EventFactory getEventFactory() {
+        return eventFactory;
     }
 
 }

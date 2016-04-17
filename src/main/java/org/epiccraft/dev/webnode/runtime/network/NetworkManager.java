@@ -1,7 +1,6 @@
 package org.epiccraft.dev.webnode.runtime.network;
 
 import org.epiccraft.dev.webnode.WebNode;
-import org.epiccraft.dev.webnode.event.Event;
 import org.epiccraft.dev.webnode.event.RawClientDisconnectEvent;
 import org.epiccraft.dev.webnode.protocol.NodeInfo;
 import org.epiccraft.dev.webnode.protocol.Packet;
@@ -47,6 +46,7 @@ public class NetworkManager {
     private void initialize() {
         this.channelManager = new ChannelManager(this);
         clientSockets = new LinkedList<>();
+
         if (server.getConfig().channels != null && server.getConfig().channels.length != 0) {
             for (Channel channel : server.getConfig().channels) {
                 channelManager.joinChannel(channel, LocalMachine.getInstance());
@@ -54,7 +54,7 @@ public class NetworkManager {
         }
 
         try {
-            //serverSocket = new ServerSocket(this, server.getConfig().localNodeNetworkAddress, server.getConfig().SSL);
+            serverSocket = new ServerSocket(this, server.getConfig().localNodeNetworkAddress, server.getConfig().SSL);
             Thread.sleep(3000);
             connectToNewNode(server.getConfig().interfaceNodeNetworkAddress);
         } catch (Exception e) {
@@ -85,7 +85,7 @@ public class NetworkManager {
             nodeMap.remove(socketAddress);
         }
 
-        eventCaused(new RawClientDisconnectEvent(socketAddress));
+        server.getEventFactory().broadcastEvent(new RawClientDisconnectEvent(socketAddress));
     }
 
     public void connectToNewNode(InetSocketAddress address) {
@@ -123,14 +123,6 @@ public class NetworkManager {
         }
     }
 
-    public void eventCaused(Event event) {
-        for (NetworkHandler networkHandler : networkHandlers) {
-            nodeMap.entrySet().stream().filter(uuidNodeEntry -> networkHandler.getInterests().includeInterest(event.getClass())).forEach(uuidNodeEntry -> {
-                networkHandler.onEvent(event);
-            });
-        }
-    }
-
     //Getters
 
     public ServerSocket getServerSocket() {
@@ -164,6 +156,14 @@ public class NetworkManager {
 
     public ChannelManager getChannelManager() {
         return channelManager;
+    }
+
+    public List<NetworkHandler> getNetworkHandlers() {
+        return networkHandlers;
+    }
+
+    public List<ClientSocket> getClientSockets() {
+        return clientSockets;
     }
 
 }

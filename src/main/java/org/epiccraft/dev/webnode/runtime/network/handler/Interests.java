@@ -22,6 +22,8 @@ public class Interests {
     private List<Class<? extends Packet>> packets;
     private List<Class<? extends Event>> events;
 
+    private boolean allInterests = true;
+
     public Interests() {
         nodeUUIDs = new LinkedList<>();
         nodeAddresses = new LinkedList<>();
@@ -72,6 +74,9 @@ public class Interests {
     }
 
     public boolean includeInterest(Object o) {
+        if (allInterests) {
+            return true;
+        }
         try {
             for (UUID nodeUUID : nodeUUIDs) {
                 if (nodeUUID.equals(o)) {
@@ -99,6 +104,14 @@ public class Interests {
 
         }
         return false;
+    }
+
+    public boolean isAllInterests() {
+        return allInterests;
+    }
+
+    public void setAllInterests(boolean allInterests) {
+        this.allInterests = allInterests;
     }
 
 }
