@@ -24,10 +24,27 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
 
     private SocketChannel socketChannel;
     private NetworkManager networkManager;
+    private NetworkStatus networkStatus;
+
+    public enum NetworkStatus {
+        ACTIVE, INACTIVE
+    }
 
     public ServerHandler(NetworkManager networkManager, SocketChannel ch) {
         this.networkManager = networkManager;
         this.socketChannel = ch;
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        networkStatus = NetworkStatus.ACTIVE;
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        networkStatus = NetworkStatus.INACTIVE;
+
+        //Start reconnect program
     }
 
     @Override
@@ -88,6 +105,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
 
         networkManager.nodeDisconnected(ctx.channel().remoteAddress());
     }
+
+
 
     @Override
     public void shutdown(Exception e) {
