@@ -49,6 +49,7 @@ public class NodeConfig {
             } catch (IllegalAccessException e) {
                 return false;
             }
+			
         }
         return true;
     }

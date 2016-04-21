@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.epiccraft.dev.webnode.modules.*;
 
 /**
  * Project WebNode
@@ -34,6 +35,7 @@ public class NetworkManager {
     private ConcurrentHashMap<UUID, Node> nodeMap = new ConcurrentHashMap<>();
     private ChannelManager channelManager;
     private List<NetworkHandler> networkHandlers;
+	private List<Module> modules;
 
     public NetworkManager(WebNode webNode) {
         server = webNode;
@@ -41,6 +43,7 @@ public class NetworkManager {
 
         clientSockets = new LinkedList<>();
         networkHandlers = new LinkedList<>();
+		modules = new LinkedList<>();
     }
 
     private void initialize() {
@@ -62,7 +65,35 @@ public class NetworkManager {
             server.getLogger().warning("Could not connect to network: " + e.getMessage());
         }
     }
+	
+	//Functions
+	
+	public void attach(Module module){
+		modules.add(module);
+	}
+	
+	public void detach(Module module){
+		modules.remove(module);
+	}
+	
+	public Module[] getModule(Class<? extends Module> type){
+		List<Module> list = new LinkedList<>();
+		
+		for (Module m : modules){
+			if (m.getClass().equals(type)){
+				list.add(m);
+			}
+		}
+		
+		Module[] result = new Module[list.size()];
+		for (int i = 0; i < list.size(); i++){
+			result[i] = list.get(i);
+		}
+		return result;
+	}
 
+	//Network
+	
     public Node newNodeConnected(NodeInfo nodeInfo) throws NodeAlreadyConnectedException {
         boolean match = false;
         for (Map.Entry<UUID, Node> uuidNodeEntry : getNodeMap().entrySet()) {

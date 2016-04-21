@@ -44,7 +44,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         networkStatus = NetworkStatus.INACTIVE;
 
-        //Start reconnect program
+        //Start reconnect process
+		
     }
 
     @Override
