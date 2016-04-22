@@ -7,7 +7,8 @@ import org.epiccraft.dev.webnode.protocol.Packet;
 import org.epiccraft.dev.webnode.protocol.channel.ChannelDataPacket;
 import org.epiccraft.dev.webnode.runtime.exception.NodeAlreadyConnectedException;
 import org.epiccraft.dev.webnode.runtime.network.client.ClientSocket;
-import org.epiccraft.dev.webnode.runtime.network.handler.NetworkHandler;
+import org.epiccraft.dev.webnode.runtime.network.customhandlers.NetworkHandler;
+import org.epiccraft.dev.webnode.runtime.network.modules.ModuleManager;
 import org.epiccraft.dev.webnode.runtime.network.server.ServerHandler;
 import org.epiccraft.dev.webnode.runtime.network.server.ServerSocket;
 import org.epiccraft.dev.webnode.structure.Node;
@@ -22,20 +23,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import org.epiccraft.dev.webnode.modules.*;
 
 /**
  * Project WebNode
  */
 public class NetworkManager {
 
+    private ModuleManager moduleManager;
     private WebNode server;
     private ServerSocket serverSocket;
     private List<ClientSocket> clientSockets;
     private ConcurrentHashMap<UUID, Node> nodeMap = new ConcurrentHashMap<>();
     private ChannelManager channelManager;
     private List<NetworkHandler> networkHandlers;
-	private List<Module> modules;
 
     public NetworkManager(WebNode webNode) {
         server = webNode;
@@ -43,7 +43,7 @@ public class NetworkManager {
 
         clientSockets = new LinkedList<>();
         networkHandlers = new LinkedList<>();
-		modules = new LinkedList<>();
+        moduleManager = new ModuleManager(this);
     }
 
     private void initialize() {
@@ -64,33 +64,13 @@ public class NetworkManager {
             e.printStackTrace();
             server.getLogger().warning("Could not connect to network: " + e.getMessage());
         }
+
+        moduleManager.initModules();
     }
 	
 	//Functions
 	
-	public void attach(Module module){
-		modules.add(module);
-	}
-	
-	public void detach(Module module){
-		modules.remove(module);
-	}
-	
-	public Module[] getModule(Class<? extends Module> type){
-		List<Module> list = new LinkedList<>();
-		
-		for (Module m : modules){
-			if (m.getClass().equals(type)){
-				list.add(m);
-			}
-		}
-		
-		Module[] result = new Module[list.size()];
-		for (int i = 0; i < list.size(); i++){
-			result[i] = list.get(i);
-		}
-		return result;
-	}
+
 
 	//Network
 	
@@ -195,6 +175,10 @@ public class NetworkManager {
 
     public List<ClientSocket> getClientSockets() {
         return clientSockets;
+    }
+
+    public ModuleManager getModuleManager() {
+        return moduleManager;
     }
 
 }

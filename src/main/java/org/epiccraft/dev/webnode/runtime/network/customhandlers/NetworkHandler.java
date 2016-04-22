@@ -1,4 +1,4 @@
-package org.epiccraft.dev.webnode.runtime.network.handler;
+package org.epiccraft.dev.webnode.runtime.network.customhandlers;
 
 import org.epiccraft.dev.webnode.event.Event;
 import org.epiccraft.dev.webnode.protocol.Packet;

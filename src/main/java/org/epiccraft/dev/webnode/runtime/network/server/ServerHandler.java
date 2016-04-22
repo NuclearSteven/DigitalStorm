@@ -26,10 +26,6 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     private NetworkManager networkManager;
     private NetworkStatus networkStatus;
 
-    public enum NetworkStatus {
-        ACTIVE, INACTIVE
-    }
-
     public ServerHandler(NetworkManager networkManager, SocketChannel ch) {
         this.networkManager = networkManager;
         this.socketChannel = ch;
@@ -107,11 +103,14 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
         networkManager.nodeDisconnected(ctx.channel().remoteAddress());
     }
 
-
-
     @Override
     public void shutdown(Exception e) {
         networkManager.getServer().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
+    }
+
+    @Override
+    public NetworkStatus getNetworkStatus() {
+        return networkStatus;
     }
 
 }

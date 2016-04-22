@@ -24,11 +24,17 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 	private SocketChannel socketChannel;
 	private NetworkManager networkManager;
     private Node node;
+	private NetworkStatus networkStatus;
 
     public ClientHandler(NetworkManager nodeNetworkManager, SocketChannel ch) {
         this.networkManager = nodeNetworkManager;
 		this.socketChannel = ch;
     }
+
+	@Override
+	public NetworkStatus getNetworkStatus() {
+		return networkStatus;
+	}
 
 	public SocketChannel getSocketChannel() {
 		return socketChannel;
@@ -60,6 +66,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
                 socketChannel.close();
                 return;
 			} else {
+				networkStatus = NetworkStatus.ACTIVE;
 				networkManager.getServer().getLogger().info("Successfully started connection.");
 			}
 

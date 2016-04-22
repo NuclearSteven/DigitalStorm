@@ -24,6 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ClientSocket {
 
+    private final InetSocketAddress address;
+    private final SslContext sslCtx;
     private NetworkManager networkManager;
     private ChannelFuture channelFuture;
     private ConcurrentHashMap<String, ClientHandler> clientHandlers = new ConcurrentHashMap<>();
@@ -39,6 +41,13 @@ public class ClientSocket {
             sslCtx = null;
         }
 
+        this.address = address;
+        this.sslCtx = sslCtx;
+
+        initConnection();
+    }
+
+    public ChannelFuture initConnection() throws InterruptedException {
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
@@ -65,6 +74,7 @@ public class ClientSocket {
         } finally {
             group.shutdownGracefully();
         }
+        return channelFuture;
     }
 
     private ClientHandler newClientHandler(InetSocketAddress address, SocketChannel ch) {
