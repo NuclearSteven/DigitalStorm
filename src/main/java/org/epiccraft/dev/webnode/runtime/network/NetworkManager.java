@@ -48,6 +48,7 @@ public class NetworkManager {
 
     private void initialize() {
         this.channelManager = new ChannelManager(this);
+        moduleManager = new ModuleManager(this);
         clientSockets = new LinkedList<>();
 
         if (server.getConfig().channels != null && server.getConfig().channels.length != 0) {
@@ -57,7 +58,7 @@ public class NetworkManager {
         }
 
         try {
-            serverSocket = new ServerSocket(this, server.getConfig().localNodeNetworkAddress, server.getConfig().SSL);
+            //serverSocket = new ServerSocket(this, server.getConfig().localNodeNetworkAddress, server.getConfig().SSL);
             Thread.sleep(3000);
             connectToNewNode(server.getConfig().interfaceNodeNetworkAddress);
         } catch (Exception e) {
