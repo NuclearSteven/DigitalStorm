@@ -32,6 +32,11 @@ public class NodeConfig {
     public Channel[] channels;
 
     /**
+     * How many times try to reconnect the server.
+     */
+    public int maxRetryTimes = 3;
+
+    /**
      * Secured connection.
      * This option must be enabled or disabled on all nodes to create a network.
      */
