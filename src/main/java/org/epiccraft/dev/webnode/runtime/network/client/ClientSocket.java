@@ -14,11 +14,8 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.epiccraft.dev.webnode.runtime.network.NetworkManager;
-import org.epiccraft.dev.webnode.runtime.network.modules.AutoReconnectModule;
-import org.epiccraft.dev.webnode.runtime.network.modules.Module;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Project WebNode
@@ -29,7 +26,7 @@ public class ClientSocket {
     private final SslContext sslCtx;
     private NetworkManager networkManager;
     private ChannelFuture channelFuture;
-    private ConcurrentHashMap<String, ClientHandler> clientHandlers = new ConcurrentHashMap<>();
+    private ClientHandler clientHandler;
     private NioEventLoopGroup group;
 
     public ClientSocket(final NetworkManager nodeNetworkManager, final InetSocketAddress address, boolean ssl) throws Exception {
@@ -47,7 +44,9 @@ public class ClientSocket {
         this.sslCtx = sslCtx;
 
         group = new NioEventLoopGroup();
+        initConnection();
     }
+
 
     public ChannelFuture initConnection() throws Exception {
         Bootstrap b = new Bootstrap();
@@ -76,21 +75,17 @@ public class ClientSocket {
     }
 
     public void disconnect() {
-        for (Module module : networkManager.getModuleManager().getModule(AutoReconnectModule.class)) {
-            if (module instanceof AutoReconnectModule) {
-                AutoReconnectModule.ReconnectListener reconnectListener = ((AutoReconnectModule) module).getReconnectListener(this);
-                if (reconnectListener != null) {
-                    reconnectListener.requestDisconnect();
-                }
-            }
-        }
         channelFuture.channel().disconnect();
         group.shutdownGracefully();
     }
 
     private ClientHandler newClientHandler(InetSocketAddress address, SocketChannel ch) {
-        ClientHandler clientHandler = new ClientHandler(networkManager, ch);
-        clientHandlers.put(networkManager.getNetworkID(address), clientHandler);
+        ClientHandler clientHandler = new ClientHandler(networkManager, this, ch);
+        this.clientHandler = clientHandler;
+        return clientHandler;
+    }
+
+    public ClientHandler getClientHandler() {
         return clientHandler;
     }
 

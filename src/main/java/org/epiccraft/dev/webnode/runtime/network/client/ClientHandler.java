@@ -21,24 +21,17 @@ import java.util.UUID;
  */
 public class ClientHandler extends ChannelInboundHandlerAdapter implements PacketHandler {
 
-	private SocketChannel socketChannel;
+    private ClientSocket clientSocket;
+    private SocketChannel socketChannel;
 	private NetworkManager networkManager;
     private Node node;
 	private NetworkStatus networkStatus;
 
-    public ClientHandler(NetworkManager nodeNetworkManager, SocketChannel ch) {
+    public ClientHandler(NetworkManager nodeNetworkManager, ClientSocket clientSocket, SocketChannel ch) {
         this.networkManager = nodeNetworkManager;
+        this.clientSocket = clientSocket;
 		this.socketChannel = ch;
     }
-
-	@Override
-	public NetworkStatus getNetworkStatus() {
-		return networkStatus;
-	}
-
-	public SocketChannel getSocketChannel() {
-		return socketChannel;
-	}
 
     @Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception
@@ -57,6 +50,30 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 	{
 		handlePacket(ctx, msg);
 	}
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception
+    {
+        ctx.flush();
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception
+    {
+        cause.printStackTrace();//// TODO: 4/24/2016 remove this
+        ctx.close();
+    }
+
+    @Override
+    public void shutdown(Exception e) {
+        networkManager.getServer().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
+        clientSocket.disconnect();
+    }
 
 	private void handlePacket(ChannelHandlerContext ctx, Object msg) {
 		if (msg instanceof HandshakeReply) {
@@ -94,22 +111,12 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 	}
 
 	@Override
-	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception
-	{
-		ctx.flush();
+	public NetworkStatus getNetworkStatus() {
+		return networkStatus;
 	}
 
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception
-	{
-		cause.printStackTrace();
-		ctx.close();
+	public SocketChannel getSocketChannel() {
+		return socketChannel;
 	}
-
-    @Override
-    public void shutdown(Exception e) {
-        networkManager.getServer().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
-        socketChannel.close();
-    }
 
 }

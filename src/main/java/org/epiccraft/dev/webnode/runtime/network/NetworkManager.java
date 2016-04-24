@@ -8,7 +8,6 @@ import org.epiccraft.dev.webnode.protocol.channel.ChannelDataPacket;
 import org.epiccraft.dev.webnode.runtime.exception.NodeAlreadyConnectedException;
 import org.epiccraft.dev.webnode.runtime.network.client.ClientSocket;
 import org.epiccraft.dev.webnode.runtime.network.customhandlers.NetworkHandler;
-import org.epiccraft.dev.webnode.runtime.network.modules.ModuleManager;
 import org.epiccraft.dev.webnode.runtime.network.server.ServerHandler;
 import org.epiccraft.dev.webnode.runtime.network.server.ServerSocket;
 import org.epiccraft.dev.webnode.structure.Node;
@@ -29,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class NetworkManager {
 
-    private ModuleManager moduleManager;
     private WebNode server;
     private ServerSocket serverSocket;
     private List<ClientSocket> clientSockets;
@@ -43,12 +41,10 @@ public class NetworkManager {
 
         clientSockets = new LinkedList<>();
         networkHandlers = new LinkedList<>();
-        moduleManager = new ModuleManager(this);
     }
 
     private void initialize() {
         this.channelManager = new ChannelManager(this);
-        moduleManager = new ModuleManager(this);
         clientSockets = new LinkedList<>();
 
         if (server.getConfig().channels != null && server.getConfig().channels.length != 0) {
@@ -65,8 +61,6 @@ public class NetworkManager {
             e.printStackTrace();
             server.getLogger().warning("Could not connect to network: " + e.getMessage());
         }
-
-        moduleManager.initModules();
     }
 	
 	//Functions
@@ -176,10 +170,6 @@ public class NetworkManager {
 
     public List<ClientSocket> getClientSockets() {
         return clientSockets;
-    }
-
-    public ModuleManager getModuleManager() {
-        return moduleManager;
     }
 
 }
