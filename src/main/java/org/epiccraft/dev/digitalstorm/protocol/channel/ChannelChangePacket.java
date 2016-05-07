@@ -1,0 +1,26 @@
+package org.epiccraft.dev.digitalstorm.protocol.channel;
+
+import org.epiccraft.dev.digitalstorm.structure.channel.Channel;
+
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Project DigitalStorm
+ */
+public class ChannelChangePacket extends ChannelPacket {
+
+    public List<Action> list = new LinkedList<>();
+
+    public static class Action {
+
+        public enum ActionType {
+            JOIN, QUIT
+        }
+
+        public ActionType actionType;
+        public Channel targetChannel;
+
+    }
+
+}
