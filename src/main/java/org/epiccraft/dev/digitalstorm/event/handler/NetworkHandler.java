@@ -1,4 +1,4 @@
-package org.epiccraft.dev.digitalstorm.runtime.network.customhandlers;
+package org.epiccraft.dev.digitalstorm.event.handler;
 
 import org.epiccraft.dev.digitalstorm.event.Event;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;

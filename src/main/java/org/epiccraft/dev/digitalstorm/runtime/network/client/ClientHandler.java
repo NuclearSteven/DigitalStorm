@@ -40,7 +40,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 		handshakeRequest.nodeInfo = new NodeInfo();
 		handshakeRequest.nodeInfo.nodeUUID = UUID.randomUUID();
 		handshakeRequest.nodeInfo.channels = networkManager.getChannelManager().getLocalChannels();
-		handshakeRequest.connectPassword = networkManager.getServer().getConfig().connectionPassword;
+		handshakeRequest.connectPassword = networkManager.getDigitalStorm().getConfig().connectionPassword;
 		ctx.write(handshakeRequest);
 		ctx.flush();
 	}
@@ -71,27 +71,27 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 
     @Override
     public void shutdown(Exception e) {
-        networkManager.getServer().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
+        networkManager.getDigitalStorm().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
         clientSocket.disconnect();
     }
 
 	private void handlePacket(ChannelHandlerContext ctx, Object msg) {
 		if (msg instanceof HandshakeReply) {
 			if (!((HandshakeReply) msg).authSuccess) {
-				networkManager.getServer().getLogger().warning("Node auth failed: " + ctx.channel().remoteAddress());
+				networkManager.getDigitalStorm().getLogger().warning("Node auth failed: " + ctx.channel().remoteAddress());
                 ctx.close();
                 socketChannel.close();
                 return;
 			} else {
 				networkStatus = NetworkStatus.ACTIVE;
-				networkManager.getServer().getLogger().info("Successfully started connection.");
+				networkManager.getDigitalStorm().getLogger().info("Successfully started connection.");
 			}
 
             Node node = null;
             try {
                 node = networkManager.newNodeConnected(((HandshakeReply) msg).nodeInfo).bindHandler(this);
             } catch (NodeAlreadyConnectedException e) {
-                networkManager.getServer().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
+                networkManager.getDigitalStorm().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
                 ctx.close();
                 socketChannel.close();
             }
@@ -101,9 +101,9 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
             this.node = node;
 
 			for (InetSocketAddress nodeUnit : ((HandshakeReply) msg).nodeUnits) {
-				networkManager.getServer().getLogger().info("Connecting to " + nodeUnit.getAddress() + "...");
+				networkManager.getDigitalStorm().getLogger().info("Connecting to " + nodeUnit.getAddress() + "...");
 				networkManager.connectToNewNode(nodeUnit);
-				networkManager.getServer().getLogger().info("Succeed!");
+				networkManager.getDigitalStorm().getLogger().info("Succeed!");
 			}
 		}
 
