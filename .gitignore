@@ -9,7 +9,7 @@
 *.ear
 
 # IDE Files #
-/WebNode.iml
+/DigitalStorm.iml
 /.classpath
 /.project
 /.idea

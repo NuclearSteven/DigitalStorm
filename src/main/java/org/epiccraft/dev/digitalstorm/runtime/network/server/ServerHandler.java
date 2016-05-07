@@ -56,7 +56,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     private void handlePacket(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof HandshakeRequest) {
             HandshakeReply reply = new HandshakeReply();
-            if (((HandshakeRequest) msg).connectPassword.equals(networkManager.getServer().getConfig().connectionPassword)) {
+            if (((HandshakeRequest) msg).connectPassword.equals(networkManager.getDigitalStorm().getConfig().connectionPassword)) {
                 reply.authSuccess = true;
                 List<InetSocketAddress> list = new LinkedList<>();
                 networkManager.getNodeMap().forEach((aLong, node) -> {
@@ -77,7 +77,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
             try {
                 networkManager.newNodeConnected(((HandshakeRequest) msg).nodeInfo).bindHandler(this);
             } catch (NodeAlreadyConnectedException e) {
-                networkManager.getServer().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
+                networkManager.getDigitalStorm().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
                 ctx.close();
             }
         } else {
@@ -97,7 +97,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
-        networkManager.getServer().getLogger().warning("Connection error caught: " + cause.getLocalizedMessage());
+        networkManager.getDigitalStorm().getLogger().warning("Connection error caught: " + cause.getLocalizedMessage());
         ctx.close();
 
         networkManager.nodeDisconnected(ctx.channel().remoteAddress());
@@ -105,7 +105,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
 
     @Override
     public void shutdown(Exception e) {
-        networkManager.getServer().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
+        networkManager.getDigitalStorm().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
     }
 
     @Override
