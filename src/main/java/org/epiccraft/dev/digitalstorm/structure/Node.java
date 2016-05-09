@@ -39,6 +39,7 @@ public class Node implements NodeUnit, ChannelMember, Serializable {
 
     public void sendPacket(Packet packet) {
         handler.getSocketChannel().write(packet);
+        handler.getSocketChannel().flush();
     }
 
     public UUID getId() {

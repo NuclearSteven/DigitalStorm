@@ -45,6 +45,11 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 		ctx.flush();
 	}
 
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+
+    }
+
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception
 	{
@@ -58,21 +63,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-
-    }
-
-    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception
     {
         cause.printStackTrace();//// TODO: 4/24/2016 remove this
         ctx.close();
-    }
-
-    @Override
-    public void shutdown(Exception e) {
-        networkManager.getDigitalStorm().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
-        clientSocket.disconnect();
     }
 
 	private void handlePacket(ChannelHandlerContext ctx, Object msg) {
@@ -109,6 +103,12 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 
 		ReferenceCountUtil.release(msg);
 	}
+
+    @Override
+    public void shutdown(Exception e) {
+        networkManager.getDigitalStorm().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
+        clientSocket.disconnect();
+    }
 
 	@Override
 	public NetworkStatus getNetworkStatus() {

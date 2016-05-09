@@ -18,4 +18,12 @@ public abstract class Packet implements Serializable {
     public void setSender(Node sender) {
         this.sender = sender;
     }
+
+    @Override
+    public String toString() {
+        return "Packet{" +
+                "sender=" + sender.getId() +
+                '}';
+    }
+
 }

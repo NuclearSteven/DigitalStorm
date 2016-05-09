@@ -39,6 +39,10 @@ public class DigitalStorm {
 
     //Getters
 
+    public static DigitalStorm getInstance() {
+        return instance;
+    }
+
     public NodeConfig getConfig() {
         return config;
     }
@@ -53,10 +57,6 @@ public class DigitalStorm {
 
     public NetworkManager getNetworkManager() {
         return networkManager;
-    }
-
-    public static DigitalStorm getInstance() {
-        return instance;
     }
 
     public EventFactory getEventFactory() {

@@ -22,7 +22,7 @@ public class EventFactory {
         networkHandlers = new LinkedList<>();
     }
 
-    public void registerPacketHandler(NetworkHandler packetHandler) {
+    public void registerHandler(NetworkHandler packetHandler) {
         networkHandlers.add(packetHandler);
     }
 

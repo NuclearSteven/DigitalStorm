@@ -44,11 +44,12 @@ public class ClientSocket {
         this.sslCtx = sslCtx;
 
         group = new NioEventLoopGroup();
+        System.out.println("ddd");
         initConnection();
     }
 
 
-    public ChannelFuture initConnection() throws Exception {
+    public void initConnection() throws Exception {
         Bootstrap b = new Bootstrap();
         b.group(group)
                 .channel(NioSocketChannel.class)
@@ -71,7 +72,6 @@ public class ClientSocket {
         ChannelFuture channelFuture = b.connect(address);
         channelFuture.sync().channel().closeFuture().sync();
         this.channelFuture = channelFuture;
-        return channelFuture;
     }
 
     public void disconnect() {

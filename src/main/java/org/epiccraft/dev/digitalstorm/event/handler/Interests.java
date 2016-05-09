@@ -33,7 +33,7 @@ public class Interests {
         events = new LinkedList<>();
     }
 
-    public void addInterest(Object o) {
+    public Interests addInterest(Object o) {
         if (o instanceof UUID) {
             nodeUUIDs.add((UUID) o);
         } else if (o instanceof Node) {
@@ -50,9 +50,11 @@ public class Interests {
                 events.add((Class<? extends Event>) o);
             }
         }
+
+        return this;
     }
 
-    public void deleteInterest(Object o) {
+    public Interests deleteInterest(Object o) {
         try {
             for (UUID nodeUUID : nodeUUIDs) {
                 if (nodeUUID.equals(o)) {
@@ -71,6 +73,8 @@ public class Interests {
         } catch (Exception e) {
 
         }
+
+        return this;
     }
 
     public boolean includeInterest(Object o) {
@@ -110,8 +114,10 @@ public class Interests {
         return allInterests;
     }
 
-    public void setAllInterests(boolean allInterests) {
+    public Interests setAllInterests(boolean allInterests) {
         this.allInterests = allInterests;
+
+        return this;
     }
 
 }

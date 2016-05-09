@@ -54,6 +54,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     }
 
     private void handlePacket(ChannelHandlerContext ctx, Object msg) {
+        System.out.println("jifdobvspcj");
         if (msg instanceof HandshakeRequest) {
             HandshakeReply reply = new HandshakeReply();
             if (((HandshakeRequest) msg).connectPassword.equals(networkManager.getDigitalStorm().getConfig().connectionPassword)) {
@@ -96,6 +97,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        networkManager.getDigitalStorm().getLogger().info("Node Disconnected: " + cause.getLocalizedMessage());
+
         cause.printStackTrace();
         networkManager.getDigitalStorm().getLogger().warning("Connection error caught: " + cause.getLocalizedMessage());
         ctx.close();

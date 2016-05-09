@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Project DigitalStorm
  */
-public class NetworkManager {
+public class NetworkManager extends Thread {
 
     private DigitalStorm digitalStorm;
     private ServerSocket serverSocket;
@@ -32,11 +32,15 @@ public class NetworkManager {
     private ConcurrentHashMap<UUID, Node> nodeMap = new ConcurrentHashMap<>();
     private ChannelManager channelManager;
 
+    @Override
+    public void run() {
+        initialize();
+    }
+
     public NetworkManager(DigitalStorm digitalStorm) {
         this.digitalStorm = digitalStorm;
-        initialize();
-
         clientSockets = new LinkedList<>();
+        start();
     }
 
     private void initialize() {
@@ -50,20 +54,17 @@ public class NetworkManager {
         }
 
         try {
-            //serverSocket = new ServerSocket(this, digitalStorm.getConfig().localNodeNetworkAddress, digitalStorm.getConfig().SSL);
-            Thread.sleep(3000);
-            connectToNewNode(digitalStorm.getConfig().interfaceNodeNetworkAddress);
+            if (digitalStorm.getConfig().serverSideTraffic)
+                serverSocket = new ServerSocket(this, digitalStorm.getConfig().localNodeNetworkAddress, digitalStorm.getConfig().SSL);
+            if (digitalStorm.getConfig().clientSideTraffic)
+                connectToNewNode(digitalStorm.getConfig().interfaceNodeNetworkAddress);
         } catch (Exception e) {
             e.printStackTrace();
             digitalStorm.getLogger().warning("Could not connect to network: " + e.getMessage());
         }
     }
-	
-	//Functions
-	
 
-
-	//Network
+    //Network
 	
     public Node newNodeConnected(NodeInfo nodeInfo) throws NodeAlreadyConnectedException {
         boolean match = false;
@@ -83,9 +84,9 @@ public class NetworkManager {
     }
 
     public void nodeDisconnected(SocketAddress socketAddress) {
-        if (nodeMap.contains(socketAddress)) {
-            nodeMap.remove(socketAddress);
-        }
+        nodeMap.entrySet().stream().filter(uuidNodeEntry -> uuidNodeEntry.getValue().getHandler().getSocketChannel().remoteAddress().equals(socketAddress)).forEach(uuidNodeEntry -> {
+            nodeMap.remove(uuidNodeEntry.getKey());
+        });
 
         digitalStorm.getEventFactory().broadcastEvent(new RawClientDisconnectEvent(socketAddress));
     }

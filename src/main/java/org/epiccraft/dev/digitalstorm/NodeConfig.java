@@ -42,6 +42,12 @@ public class NodeConfig {
      */
     public boolean SSL = false;
 
+    /**
+     * DEBUG & Advanced Settings
+     */
+    public boolean clientSideTraffic = true;
+    public boolean serverSideTraffic = true;
+
     public boolean checkValid() {
         for (Field field : getClass().getFields()) {
             if (!field.isAccessible()) {
