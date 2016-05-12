@@ -47,6 +47,9 @@ public class Channel implements Serializable {
     }
 
     public void join(ChannelMember node) {
+        if (joinedNodes == null) {
+            joinedNodes = new LinkedList<>();
+        }
         for (ChannelMember node1 : joinedNodes) {
             if (node1.getId().equals(node)) {
                 return;
