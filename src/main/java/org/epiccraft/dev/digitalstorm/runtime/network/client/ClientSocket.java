@@ -44,7 +44,6 @@ public class ClientSocket {
         this.sslCtx = sslCtx;
 
         group = new NioEventLoopGroup();
-        System.out.println("ddd");
         initConnection();
     }
 

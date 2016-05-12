@@ -54,14 +54,12 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     }
 
     private void handlePacket(ChannelHandlerContext ctx, Object msg) {
-        System.out.println("jifdobvspcj");
         if (msg instanceof HandshakeRequest) {
             HandshakeReply reply = new HandshakeReply();
             if (((HandshakeRequest) msg).connectPassword.equals(networkManager.getDigitalStorm().getConfig().connectionPassword)) {
                 reply.authSuccess = true;
                 List<InetSocketAddress> list = new LinkedList<>();
                 networkManager.getNodeMap().forEach((aLong, node) -> {
-                    System.out.println(node.getHandler().getSocketChannel().remoteAddress());
                     if (!node.getHandler().getSocketChannel().remoteAddress().equals(socketChannel.remoteAddress())) {
                         list.add(node.getHandler().getSocketChannel().remoteAddress());//// TODO: 4/14/2016 fix this 
                     }
