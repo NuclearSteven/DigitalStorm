@@ -13,6 +13,7 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import org.epiccraft.dev.digitalstorm.protocol.heartbeat.ACK;
 import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
 
 import java.net.InetSocketAddress;
@@ -43,12 +44,16 @@ public class ClientSocket {
         this.address = address;
         this.sslCtx = sslCtx;
 
-        group = new NioEventLoopGroup();
         initConnection();
     }
 
 
     public void initConnection() throws Exception {
+        initConnection(newClientHandler(address));
+    }
+
+    public void initConnection(ClientHandler clientHandler) throws InterruptedException {
+        group = new NioEventLoopGroup();
         Bootstrap b = new Bootstrap();
         b.group(group)
                 .channel(NioSocketChannel.class)
@@ -63,14 +68,17 @@ public class ClientSocket {
                         p.addLast(
                                 new ObjectEncoder(),
                                 new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                newClientHandler(address, ch)//// TODO: 4/5/2016 Check needed
+                                clientHandler
                         );
+                        ch.write(new ACK());
                     }
                 });
 
         ChannelFuture channelFuture = b.connect(address);
-        channelFuture.sync().channel().closeFuture().sync();
+        clientHandler.setSocketChannel((SocketChannel) channelFuture.channel());
         this.channelFuture = channelFuture;
+        channelFuture.channel().write(new ACK());
+        channelFuture.sync().channel().closeFuture().sync();
     }
 
     public void disconnect() {
@@ -78,8 +86,8 @@ public class ClientSocket {
         group.shutdownGracefully();
     }
 
-    private ClientHandler newClientHandler(InetSocketAddress address, SocketChannel ch) {
-        ClientHandler clientHandler = new ClientHandler(networkManager, this, ch);
+    private ClientHandler newClientHandler(InetSocketAddress address) {
+        ClientHandler clientHandler = new ClientHandler(networkManager, this);
         this.clientHandler = clientHandler;
         return clientHandler;
     }

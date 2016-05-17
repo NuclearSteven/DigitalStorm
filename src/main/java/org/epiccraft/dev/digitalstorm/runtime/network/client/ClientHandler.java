@@ -14,7 +14,6 @@ import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
-import java.util.UUID;
 
 /**
  * Project DigitalStorm
@@ -27,19 +26,22 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
     private Node node;
 	private NetworkStatus networkStatus;
 
-    public ClientHandler(NetworkManager nodeNetworkManager, ClientSocket clientSocket, SocketChannel ch) {
+    public ClientHandler(NetworkManager nodeNetworkManager, ClientSocket clientSocket) {
         this.networkManager = nodeNetworkManager;
         this.clientSocket = clientSocket;
-		this.socketChannel = ch;
+    }
+
+    public void setSocketChannel(SocketChannel socketChannel) {
+        this.socketChannel = socketChannel;
     }
 
     @Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception
 	{
-		HandshakeRequest handshakeRequest = new HandshakeRequest();
+        networkStatus = NetworkStatus.ACTIVE;
+        HandshakeRequest handshakeRequest = new HandshakeRequest();
 		handshakeRequest.nodeInfo = new NodeInfo();
-		handshakeRequest.nodeInfo.nodeUUID = UUID.randomUUID();
-		handshakeRequest.nodeInfo.channels = networkManager.getChannelManager().getLocalChannels();
+		handshakeRequest.nodeInfo.nodeUUID = networkManager.getUuid();
 		handshakeRequest.connectPassword = networkManager.getDigitalStorm().getConfig().connectionPassword;
 		ctx.write(handshakeRequest);
 		ctx.flush();
@@ -47,7 +49,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-
+        networkManager.getDigitalStorm().getLogger().warning("Connection lost, trying to reconnect: " + socketChannel.remoteAddress());
+        networkStatus = NetworkStatus.INACTIVE;
+        clientSocket.disconnect();
+        clientSocket.initConnection();
     }
 
 	@Override
@@ -65,7 +70,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception
     {
-        cause.printStackTrace();//// TODO: 4/24/2016 remove this
+        cause.printStackTrace();
+        if (networkStatus == NetworkStatus.INACTIVE) {
+            clientSocket.initConnection(this);
+        }
         ctx.close();
     }
 

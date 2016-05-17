@@ -22,7 +22,7 @@ public abstract class Packet implements Serializable {
     @Override
     public String toString() {
         return "Packet{" +
-                "sender=" + sender.getId() +
+                "sender=" + sender.getUUID() +
                 '}';
     }
 

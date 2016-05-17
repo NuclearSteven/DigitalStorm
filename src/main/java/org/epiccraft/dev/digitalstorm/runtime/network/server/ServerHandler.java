@@ -8,10 +8,11 @@ import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.action.request.HandshakeRequest;
+import org.epiccraft.dev.digitalstorm.protocol.heartbeat.ACK;
+import org.epiccraft.dev.digitalstorm.protocol.heartbeat.NACK;
 import org.epiccraft.dev.digitalstorm.runtime.exception.NodeAlreadyConnectedException;
 import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
-import org.epiccraft.dev.digitalstorm.structure.channel.LocalMachine;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
@@ -25,6 +26,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     private SocketChannel socketChannel;
     private NetworkManager networkManager;
     private NetworkStatus networkStatus;
+    private long lastActive;
 
     public ServerHandler(NetworkManager networkManager, SocketChannel ch) {
         this.networkManager = networkManager;
@@ -41,7 +43,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
         networkStatus = NetworkStatus.INACTIVE;
 
         //Start reconnect process
-		
+		// TODO: 5/15/2016
     }
 
     @Override
@@ -54,6 +56,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     }
 
     private void handlePacket(ChannelHandlerContext ctx, Object msg) {
+        lastActive = System.currentTimeMillis();
         if (msg instanceof HandshakeRequest) {
             HandshakeReply reply = new HandshakeReply();
             if (((HandshakeRequest) msg).connectPassword.equals(networkManager.getDigitalStorm().getConfig().connectionPassword)) {
@@ -66,8 +69,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 });
                 reply.nodeUnits = list;
                 reply.nodeInfo = new NodeInfo();
-                reply.nodeInfo.channels = networkManager.getChannelManager().getLocalChannels();
-                reply.nodeInfo.nodeUUID = LocalMachine.getInstance().getId();
+                reply.nodeInfo.nodeUUID = networkManager.getUuid();
             } else {
                 reply.authSuccess = false;
             }
@@ -80,6 +82,10 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 ctx.close();
             }
         } else {
+            if (msg instanceof ACK) {
+                ctx.write(new NACK());
+                return;
+            }
             if (msg instanceof Packet) {
                 networkManager.packetReceived((Packet) msg, this);
             }

@@ -9,9 +9,6 @@ import org.epiccraft.dev.digitalstorm.runtime.network.client.ClientSocket;
 import org.epiccraft.dev.digitalstorm.runtime.network.server.ServerHandler;
 import org.epiccraft.dev.digitalstorm.runtime.network.server.ServerSocket;
 import org.epiccraft.dev.digitalstorm.structure.Node;
-import org.epiccraft.dev.digitalstorm.structure.channel.Channel;
-import org.epiccraft.dev.digitalstorm.structure.channel.ChannelManager;
-import org.epiccraft.dev.digitalstorm.structure.channel.LocalMachine;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -30,28 +27,22 @@ public class NetworkManager extends Thread {
     private ServerSocket serverSocket;
     private List<ClientSocket> clientSockets;
     private ConcurrentHashMap<UUID, Node> nodeMap = new ConcurrentHashMap<>();
-    private ChannelManager channelManager;
+    private UUID uuid;
+
+    public NetworkManager(DigitalStorm digitalStorm) {
+        this.digitalStorm = digitalStorm;
+        clientSockets = new LinkedList<>();
+        uuid = UUID.randomUUID();
+        clientSockets = new LinkedList<>();
+        start();
+    }
 
     @Override
     public void run() {
         initialize();
     }
 
-    public NetworkManager(DigitalStorm digitalStorm) {
-        this.digitalStorm = digitalStorm;
-        clientSockets = new LinkedList<>();
-        start();
-    }
-
     private void initialize() {
-        this.channelManager = new ChannelManager(this);
-        clientSockets = new LinkedList<>();
-
-        if (digitalStorm.getConfig().channels != null && digitalStorm.getConfig().channels.length != 0) {
-            for (Channel channel : digitalStorm.getConfig().channels) {
-                channelManager.joinChannel(channel, LocalMachine.getInstance());
-            }
-        }
 
         try {
             if (digitalStorm.getConfig().serverSideTraffic)
@@ -64,8 +55,25 @@ public class NetworkManager extends Thread {
         }
     }
 
+    public void connectToNewNode(InetSocketAddress address) {
+        connectToNewNode(address, digitalStorm.getConfig().SSL);
+    }
+
     //Network
 	
+    public void connectToNewNode(InetSocketAddress address, boolean ssl) {
+        try {
+            clientSockets.add(new ClientSocket(this, address, ssl));
+        } catch (Exception e) {
+            e.printStackTrace();
+            digitalStorm.getLogger().info("Client socket failed to initialize: " + e.getLocalizedMessage());
+        }
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
     public Node newNodeConnected(NodeInfo nodeInfo) throws NodeAlreadyConnectedException {
         boolean match = false;
         for (Map.Entry<UUID, Node> uuidNodeEntry : getNodeMap().entrySet()) {
@@ -78,9 +86,13 @@ public class NetworkManager extends Thread {
             throw new NodeAlreadyConnectedException();
         }
 
-        Node nodeUnit = new Node(this, nodeInfo.nodeUUID, nodeInfo.channels);
+        Node nodeUnit = new Node(this, nodeInfo.nodeUUID);
         nodeMap.put(nodeInfo.nodeUUID, nodeUnit);
         return nodeUnit;
+    }
+
+    public ConcurrentHashMap<UUID, Node> getNodeMap() {
+        return nodeMap;
     }
 
     public void nodeDisconnected(SocketAddress socketAddress) {
@@ -91,24 +103,11 @@ public class NetworkManager extends Thread {
         digitalStorm.getEventFactory().broadcastEvent(new RawClientDisconnectEvent(socketAddress));
     }
 
-    public void connectToNewNode(InetSocketAddress address) {
-        connectToNewNode(address, digitalStorm.getConfig().SSL);
-    }
-
-    public void connectToNewNode(InetSocketAddress address, boolean ssl) {
-        try {
-            clientSockets.add(new ClientSocket(this, address, ssl));
-        } catch (Exception e) {
-            e.printStackTrace();
-            digitalStorm.getLogger().info("Client socket failed to initialize: " + e.getLocalizedMessage());
-        }
-    }
+    //Getters
 
     public void packetReceived(Packet msg, ServerHandler serverHandler) {
         digitalStorm.getEventFactory().broadcastPacket(msg, serverHandler);
     }
-
-    //Getters
 
     public ServerSocket getServerSocket() {
         return serverSocket;
@@ -126,10 +125,6 @@ public class NetworkManager extends Thread {
         return address.getHostString() + ":" + address.getPort();
     }
 
-    public ConcurrentHashMap<UUID, Node> getNodeMap() {
-        return nodeMap;
-    }
-
     public Node getNode(UUID uuid) {
         for (Map.Entry<UUID, Node> uuidNodeEntry : nodeMap.entrySet()) {
             if (uuidNodeEntry.getKey().equals(uuid)) {
@@ -137,10 +132,6 @@ public class NetworkManager extends Thread {
             }
         }
         return null;
-    }
-
-    public ChannelManager getChannelManager() {
-        return channelManager;
     }
 
     public List<ClientSocket> getClientSockets() {

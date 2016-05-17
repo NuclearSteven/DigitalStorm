@@ -1,7 +1,5 @@
 package org.epiccraft.dev.digitalstorm.protocol.channel;
 
-import org.epiccraft.dev.digitalstorm.structure.channel.Channel;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,7 +17,7 @@ public class ChannelChangePacket extends ChannelPacket {
         }
 
         public ActionType actionType;
-        public Channel targetChannel;
+//        public Channel targetChannel;
 
     }
 

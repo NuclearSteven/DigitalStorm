@@ -7,12 +7,10 @@ import org.epiccraft.dev.digitalstorm.event.handler.NetworkHandler;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.channel.ChannelDataPacket;
 import org.epiccraft.dev.digitalstorm.protocol.heartbeat.ACK;
-import org.epiccraft.dev.digitalstorm.runtime.network.client.ClientSocket;
-import org.epiccraft.dev.digitalstorm.structure.channel.Channel;
-import org.epiccraft.dev.digitalstorm.structure.channel.ChannelMember;
-import org.epiccraft.dev.digitalstorm.structure.channel.LocalMachine;
+import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -43,7 +41,7 @@ public class Test extends NetworkHandler {
         nodeConfig.serverSideTraffic = !type;
         nodeConfig.checkValid();
         DigitalStorm digitalStorm = new DigitalStorm(nodeConfig);
-
+        digitalStorm.getEventFactory().registerHandler(this);
         String s;
         while (true) {
             s = scanner.nextLine();
@@ -52,9 +50,10 @@ public class Test extends NetworkHandler {
             }
             if (s.equals("break"))
                 break;
-            digitalStorm.getNetworkManager().getNodeMap().forEach((uuid, node) -> {
-                node.sendPacket(new ACK());
-            });
+            for (Map.Entry<UUID, Node> uuidNodeEntry : digitalStorm.getNetworkManager().getNodeMap().entrySet()) {
+                System.out.println("send");
+                uuidNodeEntry.getValue().sendPacket(new ACK());
+            }
         }
     }
 

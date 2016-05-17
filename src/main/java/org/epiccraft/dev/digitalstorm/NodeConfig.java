@@ -1,7 +1,5 @@
 package org.epiccraft.dev.digitalstorm;
 
-import org.epiccraft.dev.digitalstorm.structure.channel.Channel;
-
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 
@@ -25,11 +23,6 @@ public class NodeConfig {
      * This option must be enabled or disabled on all nodes to create a network.
      */
     public String connectionPassword = null;
-
-    /**
-     * Node group
-     */
-    public Channel[] channels;
 
     /**
      * How many times try to reconnect the server.

@@ -3,7 +3,6 @@ package org.epiccraft.dev.digitalstorm.event.handler;
 import org.epiccraft.dev.digitalstorm.event.Event;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.structure.Node;
-import org.epiccraft.dev.digitalstorm.structure.channel.Channel;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
@@ -18,7 +17,6 @@ public class Interests {
     private List<UUID> nodeUUIDs;
     private List<Node> nodes;
     private List<InetSocketAddress> nodeAddresses;
-    private List<Channel> channels;
     private List<Class<? extends Packet>> packets;
     private List<Class<? extends Event>> events;
 
@@ -28,7 +26,6 @@ public class Interests {
         nodeUUIDs = new LinkedList<>();
         nodeAddresses = new LinkedList<>();
         nodes = new LinkedList<>();
-        channels = new LinkedList<>();
         packets = new LinkedList<>();
         events = new LinkedList<>();
     }
@@ -40,8 +37,6 @@ public class Interests {
             nodes.add((Node) o);
         } else if (o instanceof InetSocketAddress) {
             nodeAddresses.add((InetSocketAddress) o);
-        } else if (o instanceof Channel) {
-            channels.add((Channel) o);
         } else if (o instanceof Class) {
             if (((Class) o).isAssignableFrom(Packet.class)) {
                 packets.add((Class<? extends Packet>) o);
@@ -67,7 +62,6 @@ public class Interests {
                     nodeAddresses.remove(nodeAddress);
                 }
             }
-            channels.remove(o);
             packets.remove(o);
             events.remove(o);
         } catch (Exception e) {
@@ -94,9 +88,6 @@ public class Interests {
                 if (nodeAddress.equals(o)) {
                     return true;
                 }
-            }
-            if (channels.contains(o)) {
-                return true;
             }
             if (packets.contains(o)) {
                 return true;
