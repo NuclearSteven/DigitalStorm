@@ -79,7 +79,7 @@ public class NetworkManager extends Thread {
             throw new NodeAlreadyConnectedException();
         }
 
-        Node node = new Node(this, nodeInfo.nodeUUID);
+        Node node = new Node(this, nodeInfo);
         nodeMap.put(nodeInfo.nodeUUID, node);
 
         digitalStorm.getEventFactory().broadcastEvent(new RawConnetedEvent(socketAddress));

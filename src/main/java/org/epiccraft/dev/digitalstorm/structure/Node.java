@@ -1,5 +1,6 @@
 package org.epiccraft.dev.digitalstorm.structure;
 
+import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
@@ -10,18 +11,20 @@ import java.util.UUID;
 /**
  * Project DigitalStorm
  */
-public class Node implements NodeUnit, Serializable {
+public class Node implements Serializable {
 
-    private NetworkManager networkManager;
     public UUID id;
+    private String type;
+    private NetworkManager networkManager;
     private PacketHandler handler;
-
-    public Node(NetworkManager nodeNetworkManager, UUID nid) {
+    public Node(NetworkManager nodeNetworkManager, NodeInfo nodeInfo) {
         this.networkManager = nodeNetworkManager;
-        this.id = nid;
-        if (nid == null) {
-            System.out.println("null");
-        }
+        this.id = nodeInfo.nodeUUID;
+        this.type = nodeInfo.type;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public Node bindHandler(PacketHandler handler) {
