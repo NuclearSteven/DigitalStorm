@@ -19,6 +19,9 @@ public class Node implements NodeUnit, Serializable {
     public Node(NetworkManager nodeNetworkManager, UUID nid) {
         this.networkManager = nodeNetworkManager;
         this.id = nid;
+        if (nid == null) {
+            System.out.println("null");
+        }
     }
 
     public Node bindHandler(PacketHandler handler) {

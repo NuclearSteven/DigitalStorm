@@ -2,6 +2,7 @@ package org.epiccraft.dev.digitalstorm.runtime.network.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -25,6 +26,7 @@ public class ClientSocket {
 
     private final InetSocketAddress address;
     private final SslContext sslCtx;
+    private ReconnectListener reconnectListsner;
     private NetworkManager networkManager;
     private ChannelFuture channelFuture;
     private ClientHandler clientHandler;
@@ -44,6 +46,9 @@ public class ClientSocket {
         this.address = address;
         this.sslCtx = sslCtx;
 
+        group = new NioEventLoopGroup();
+        this.reconnectListsner = new ReconnectListener();
+
         initConnection();
     }
 
@@ -52,8 +57,11 @@ public class ClientSocket {
         initConnection(newClientHandler(address));
     }
 
+    public NioEventLoopGroup getGroup() {
+        return group;
+    }
+
     public void initConnection(ClientHandler clientHandler) throws InterruptedException {
-        group = new NioEventLoopGroup();
         Bootstrap b = new Bootstrap();
         b.group(group)
                 .channel(NioSocketChannel.class)
@@ -70,15 +78,30 @@ public class ClientSocket {
                                 new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
                                 clientHandler
                         );
-                        ch.write(new ACK());
                     }
                 });
 
         ChannelFuture channelFuture = b.connect(address);
         clientHandler.setSocketChannel((SocketChannel) channelFuture.channel());
-        this.channelFuture = channelFuture;
-        channelFuture.channel().write(new ACK());
+        channelFuture.addListener(connFuture -> {
+            if (!channelFuture.isSuccess()) {
+                reconnectListsner.operationComplete(channelFuture);
+            }
+            channelFuture.channel().closeFuture().addListener(reconnectListsner);
+        });
         channelFuture.sync().channel().closeFuture().sync();
+        System.out.println("finish");
+
+    }
+
+    public class ReconnectListener implements ChannelFutureListener {
+
+        @Override
+        public void operationComplete(ChannelFuture future) throws Exception {
+            future.channel().disconnect();
+            initConnection();
+        }
+
     }
 
     public void disconnect() {
@@ -94,14 +117,6 @@ public class ClientSocket {
 
     public ClientHandler getClientHandler() {
         return clientHandler;
-    }
-
-    public NioEventLoopGroup getGroup() {
-        return group;
-    }
-
-    public ChannelFuture getChannelFuture() {
-        return channelFuture;
     }
 
 }

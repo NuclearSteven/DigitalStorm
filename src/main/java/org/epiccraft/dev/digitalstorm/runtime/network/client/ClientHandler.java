@@ -1,10 +1,12 @@
 package org.epiccraft.dev.digitalstorm.runtime.network.client;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
 import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
+import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.action.request.HandshakeRequest;
 import org.epiccraft.dev.digitalstorm.runtime.exception.NodeAlreadyConnectedException;
@@ -14,6 +16,7 @@ import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
+import java.util.UUID;
 
 /**
  * Project DigitalStorm
@@ -41,7 +44,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
         networkStatus = NetworkStatus.ACTIVE;
         HandshakeRequest handshakeRequest = new HandshakeRequest();
 		handshakeRequest.nodeInfo = new NodeInfo();
-		handshakeRequest.nodeInfo.nodeUUID = networkManager.getUuid();
+		handshakeRequest.nodeInfo.nodeUUID = UUID.randomUUID();
 		handshakeRequest.connectPassword = networkManager.getDigitalStorm().getConfig().connectionPassword;
 		ctx.write(handshakeRequest);
 		ctx.flush();
@@ -49,10 +52,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        networkManager.getDigitalStorm().getLogger().warning("Connection lost, trying to reconnect: " + socketChannel.remoteAddress());
         networkStatus = NetworkStatus.INACTIVE;
-        clientSocket.disconnect();
-        clientSocket.initConnection();
+        networkManager.nodeDisconnected(getSocketChannel().remoteAddress());
     }
 
 	@Override
@@ -71,10 +72,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception
     {
         cause.printStackTrace();
-        if (networkStatus == NetworkStatus.INACTIVE) {
-            clientSocket.initConnection(this);
-        }
-        ctx.close();
+        ctx.fireChannelInactive();
     }
 
 	private void handlePacket(ChannelHandlerContext ctx, Object msg) {
@@ -82,7 +80,6 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 			if (!((HandshakeReply) msg).authSuccess) {
 				networkManager.getDigitalStorm().getLogger().warning("Node auth failed: " + ctx.channel().remoteAddress());
                 ctx.close();
-                socketChannel.close();
                 return;
 			} else {
 				networkStatus = NetworkStatus.ACTIVE;
@@ -107,16 +104,12 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 				networkManager.connectToNewNode(nodeUnit);
 				networkManager.getDigitalStorm().getLogger().info("Succeed!");
 			}
-		}
+		} else {
+            networkManager.packetReceived((Packet) msg, this);
+        }
 
 		ReferenceCountUtil.release(msg);
 	}
-
-    @Override
-    public void shutdown(Exception e) {
-        networkManager.getDigitalStorm().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
-        clientSocket.disconnect();
-    }
 
 	@Override
 	public NetworkStatus getNetworkStatus() {
@@ -126,5 +119,11 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 	public SocketChannel getSocketChannel() {
 		return socketChannel;
 	}
+
+    @Override
+    public void shutdown(Exception e) {
+        networkManager.getDigitalStorm().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
+        clientSocket.disconnect();
+    }
 
 }

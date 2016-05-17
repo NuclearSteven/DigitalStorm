@@ -70,7 +70,7 @@ public class ServerSocket {
             ;
 
             ChannelFuture channelFuture = b.bind(localAddr);
-            channelFuture.sync().channel().closeFuture().sync();
+            channelFuture.sync().channel().closeFuture().await();
             this.channelFuture = channelFuture;
         } finally {
             bossGroup.shutdownGracefully();

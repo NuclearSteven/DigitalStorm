@@ -51,10 +51,6 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
         handlePacket(ctx, msg);
     }
 
-    public SocketChannel getSocketChannel() {
-        return socketChannel;
-    }
-
     private void handlePacket(ChannelHandlerContext ctx, Object msg) {
         lastActive = System.currentTimeMillis();
         if (msg instanceof HandshakeRequest) {
@@ -64,7 +60,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 List<InetSocketAddress> list = new LinkedList<>();
                 networkManager.getNodeMap().forEach((aLong, node) -> {
                     if (!node.getHandler().getSocketChannel().remoteAddress().equals(socketChannel.remoteAddress())) {
-                        list.add(node.getHandler().getSocketChannel().remoteAddress());//// TODO: 4/14/2016 fix this 
+                        list.add(node.getHandler().getSocketChannel().remoteAddress());//// TODO: 4/14/2016 fix this
                     }
                 });
                 reply.nodeUnits = list;
@@ -84,6 +80,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
         } else {
             if (msg instanceof ACK) {
                 ctx.write(new NACK());
+                networkManager.getDigitalStorm().getLogger().info("Packet: " + msg.getClass().getSimpleName());
                 return;
             }
             if (msg instanceof Packet) {
@@ -105,19 +102,23 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
 
         cause.printStackTrace();
         networkManager.getDigitalStorm().getLogger().warning("Connection error caught: " + cause.getLocalizedMessage());
+
         ctx.close();
-
         networkManager.nodeDisconnected(ctx.channel().remoteAddress());
-    }
-
-    @Override
-    public void shutdown(Exception e) {
-        networkManager.getDigitalStorm().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
     }
 
     @Override
     public NetworkStatus getNetworkStatus() {
         return networkStatus;
+    }
+
+    public SocketChannel getSocketChannel() {
+        return socketChannel;
+    }
+
+    @Override
+    public void shutdown(Exception e) {
+        networkManager.getDigitalStorm().getLogger().warning("Channel is shutting down due to " + e.getLocalizedMessage());
     }
 
 }

@@ -2,6 +2,7 @@ package org.epiccraft.dev.digitalstorm.runtime.network;
 
 import org.epiccraft.dev.digitalstorm.DigitalStorm;
 import org.epiccraft.dev.digitalstorm.event.RawClientDisconnectEvent;
+import org.epiccraft.dev.digitalstorm.event.handler.NetworkHandler;
 import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.runtime.exception.NodeAlreadyConnectedException;
@@ -58,8 +59,6 @@ public class NetworkManager extends Thread {
     public void connectToNewNode(InetSocketAddress address) {
         connectToNewNode(address, digitalStorm.getConfig().SSL);
     }
-
-    //Network
 	
     public void connectToNewNode(InetSocketAddress address, boolean ssl) {
         try {
@@ -86,9 +85,9 @@ public class NetworkManager extends Thread {
             throw new NodeAlreadyConnectedException();
         }
 
-        Node nodeUnit = new Node(this, nodeInfo.nodeUUID);
-        nodeMap.put(nodeInfo.nodeUUID, nodeUnit);
-        return nodeUnit;
+        Node node = new Node(this, nodeInfo.nodeUUID);
+        nodeMap.put(nodeInfo.nodeUUID, node);
+        return node;
     }
 
     public ConcurrentHashMap<UUID, Node> getNodeMap() {
@@ -105,8 +104,8 @@ public class NetworkManager extends Thread {
 
     //Getters
 
-    public void packetReceived(Packet msg, ServerHandler serverHandler) {
-        digitalStorm.getEventFactory().broadcastPacket(msg, serverHandler);
+    public void packetReceived(Packet msg, PacketHandler packetHandler) {
+        digitalStorm.getEventFactory().broadcastPacket(msg, packetHandler);
     }
 
     public ServerSocket getServerSocket() {
