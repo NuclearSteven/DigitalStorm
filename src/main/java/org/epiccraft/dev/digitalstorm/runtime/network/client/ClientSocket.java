@@ -83,12 +83,14 @@ public class ClientSocket {
 
         ChannelFuture channelFuture = b.connect(address);
         clientHandler.setSocketChannel((SocketChannel) channelFuture.channel());
-        channelFuture.addListener(connFuture -> {
-            if (!channelFuture.isSuccess()) {
-                reconnectListsner.operationComplete(channelFuture);
-            }
-            channelFuture.channel().closeFuture().addListener(reconnectListsner);
-        });
+        if (networkManager.getDigitalStorm().getConfig().autoRetry) {
+            channelFuture.addListener(connFuture -> {
+                if (!channelFuture.isSuccess()) {
+                    reconnectListsner.operationComplete(channelFuture);
+                }
+                channelFuture.channel().closeFuture().addListener(reconnectListsner);
+            });
+        }
         channelFuture.sync().channel().closeFuture().sync();
         System.out.println("finish");
 

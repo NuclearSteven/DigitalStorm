@@ -25,9 +25,9 @@ public class NodeConfig {
     public String connectionPassword = null;
 
     /**
-     * How many times try to reconnect the server.
+     * Try to reconnect the server.
      */
-    public int maxRetryTimes = 3;
+    public boolean autoRetry = true;
 
     /**
      * Secured connection.
