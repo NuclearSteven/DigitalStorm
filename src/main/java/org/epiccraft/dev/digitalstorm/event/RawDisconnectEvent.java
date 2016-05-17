@@ -5,7 +5,7 @@ import java.net.SocketAddress;
 /**
  * Project DigitalStorm
  */
-public class RawClientDisconnectEvent extends Event {
+public class RawDisconnectEvent extends Event {
 
     public SocketAddress getAddress() {
         return address;
@@ -13,7 +13,7 @@ public class RawClientDisconnectEvent extends Event {
 
     private SocketAddress address;
 
-    public RawClientDisconnectEvent(SocketAddress socketAddress) {
+    public RawDisconnectEvent(SocketAddress socketAddress) {
         this.address = socketAddress;
     }
 

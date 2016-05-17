@@ -36,6 +36,11 @@ public class NodeConfig {
     public boolean SSL = false;
 
     /**
+     * Type of this server
+     */
+    public String type = "Default";
+
+    /**
      * DEBUG & Advanced Settings
      */
     public boolean clientSideTraffic = true;

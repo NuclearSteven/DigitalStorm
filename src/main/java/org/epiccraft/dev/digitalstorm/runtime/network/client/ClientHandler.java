@@ -45,7 +45,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
         HandshakeRequest handshakeRequest = new HandshakeRequest();
 		handshakeRequest.nodeInfo = new NodeInfo();
 		handshakeRequest.nodeInfo.nodeUUID = UUID.randomUUID();
-		handshakeRequest.connectPassword = networkManager.getDigitalStorm().getConfig().connectionPassword;
+        handshakeRequest.nodeInfo.type = networkManager.getDigitalStorm().getConfig().type;
+        handshakeRequest.connectPassword = networkManager.getDigitalStorm().getConfig().connectionPassword;
 		ctx.write(handshakeRequest);
 		ctx.flush();
 	}
@@ -88,7 +89,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 
             Node node = null;
             try {
-                node = networkManager.newNodeConnected(((HandshakeReply) msg).nodeInfo).bindHandler(this);
+                node = networkManager.newNodeConnected(((HandshakeReply) msg).nodeInfo, socketChannel.remoteAddress()).bindHandler(this);
             } catch (NodeAlreadyConnectedException e) {
                 networkManager.getDigitalStorm().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
                 ctx.close();

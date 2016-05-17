@@ -66,13 +66,14 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 reply.nodeUnits = list;
                 reply.nodeInfo = new NodeInfo();
                 reply.nodeInfo.nodeUUID = networkManager.getUuid();
+                reply.nodeInfo.type = networkManager.getDigitalStorm().getConfig().type;
             } else {
                 reply.authSuccess = false;
             }
             ctx.write(reply);
 
             try {
-                networkManager.newNodeConnected(((HandshakeRequest) msg).nodeInfo).bindHandler(this);
+                networkManager.newNodeConnected(((HandshakeRequest) msg).nodeInfo, socketChannel.remoteAddress()).bindHandler(this);
             } catch (NodeAlreadyConnectedException e) {
                 networkManager.getDigitalStorm().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
                 ctx.close();

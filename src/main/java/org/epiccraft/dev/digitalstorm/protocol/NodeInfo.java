@@ -8,6 +8,7 @@ import java.util.UUID;
  */
 public class NodeInfo implements Serializable {
 
+    public String type;
     public UUID nodeUUID;
 
 }
