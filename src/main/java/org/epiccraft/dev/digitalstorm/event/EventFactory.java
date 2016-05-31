@@ -2,10 +2,9 @@ package org.epiccraft.dev.digitalstorm.event;
 
 import org.epiccraft.dev.digitalstorm.event.handler.NetworkHandler;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
-import org.epiccraft.dev.digitalstorm.protocol.channel.ChannelDataPacket;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelDataPacket;
 import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
-import org.epiccraft.dev.digitalstorm.runtime.network.server.ServerHandler;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.util.LinkedList;
@@ -31,9 +30,7 @@ public class EventFactory {
     }
 
     public void broadcastEvent(Event event) {
-        networkHandlers.stream().filter(networkHandler -> networkHandler.getInterests().includeInterest(event)).forEach(networkHandler -> {
-            networkHandler.onEvent(event);
-        });
+        networkHandlers.stream().filter(networkHandler -> networkHandler.getInterests().includeInterest(event)).forEach(networkHandler -> networkHandler.onEvent(event));
     }
 
     public void broadcastPacket(Packet packet, PacketHandler handler) {

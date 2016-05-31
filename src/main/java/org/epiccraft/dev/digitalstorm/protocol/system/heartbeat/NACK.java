@@ -1,4 +1,4 @@
-package org.epiccraft.dev.digitalstorm.protocol.heartbeat;
+package org.epiccraft.dev.digitalstorm.protocol.system.heartbeat;
 
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 

@@ -1,4 +1,4 @@
-package org.epiccraft.dev.digitalstorm.protocol.action;
+package org.epiccraft.dev.digitalstorm.protocol.system.action;
 
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 

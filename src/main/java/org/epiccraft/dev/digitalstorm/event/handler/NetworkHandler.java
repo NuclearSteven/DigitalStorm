@@ -2,7 +2,7 @@ package org.epiccraft.dev.digitalstorm.event.handler;
 
 import org.epiccraft.dev.digitalstorm.event.Event;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
-import org.epiccraft.dev.digitalstorm.protocol.channel.ChannelDataPacket;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelDataPacket;
 
 /**
  * Project DigitalStorm

@@ -1,6 +1,6 @@
-package org.epiccraft.dev.digitalstorm.protocol.action.request;
+package org.epiccraft.dev.digitalstorm.protocol.system.action.request;
 
-import org.epiccraft.dev.digitalstorm.protocol.action.Request;
+import org.epiccraft.dev.digitalstorm.protocol.system.action.Request;
 import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 
 /**

@@ -1,6 +1,6 @@
-package org.epiccraft.dev.digitalstorm.protocol.action.reply;
+package org.epiccraft.dev.digitalstorm.protocol.system.action.reply;
 
-import org.epiccraft.dev.digitalstorm.protocol.action.Reply;
+import org.epiccraft.dev.digitalstorm.protocol.system.action.Reply;
 import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 
 import java.net.InetSocketAddress;

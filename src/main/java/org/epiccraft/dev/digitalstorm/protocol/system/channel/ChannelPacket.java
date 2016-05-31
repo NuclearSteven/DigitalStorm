@@ -1,4 +1,4 @@
-package org.epiccraft.dev.digitalstorm.protocol.channel;
+package org.epiccraft.dev.digitalstorm.protocol.system.channel;
 
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 

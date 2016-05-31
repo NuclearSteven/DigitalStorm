@@ -14,7 +14,6 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import org.epiccraft.dev.digitalstorm.protocol.heartbeat.ACK;
 import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
 
 import java.net.InetSocketAddress;

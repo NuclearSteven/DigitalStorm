@@ -1,12 +1,11 @@
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import org.epiccraft.dev.digitalstorm.DigitalStorm;
 import org.epiccraft.dev.digitalstorm.NodeConfig;
 import org.epiccraft.dev.digitalstorm.event.Event;
 import org.epiccraft.dev.digitalstorm.event.handler.Interests;
 import org.epiccraft.dev.digitalstorm.event.handler.NetworkHandler;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
-import org.epiccraft.dev.digitalstorm.protocol.channel.ChannelDataPacket;
-import org.epiccraft.dev.digitalstorm.protocol.heartbeat.ACK;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelDataPacket;
+import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.ACK;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
@@ -27,11 +26,7 @@ public class Test extends NetworkHandler {
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
         boolean type;
-        if (input.equals("c")) {
-            type = true;
-        } else {
-            type = false;
-        }
+        type = input.equals("c");
         NodeConfig nodeConfig = new NodeConfig();
         nodeConfig.connectionPassword = "000";
         nodeConfig.localNodeNetworkAddress = new InetSocketAddress("127.0.0.1", 1234);
