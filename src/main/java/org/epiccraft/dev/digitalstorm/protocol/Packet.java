@@ -9,6 +9,8 @@ import java.io.Serializable;
  */
 public abstract class Packet implements Serializable {
 
+    public static final int PROTOCOL_VERSION = 1;
+
     private Node sender;
 
     public Node getSender() {
@@ -21,7 +23,7 @@ public abstract class Packet implements Serializable {
 
     @Override
     public String toString() {
-        return "Packet{" +
+        return this.getClass().getSimpleName() + "{" +
                 "sender=" + sender.getUUID() +
                 '}';
     }

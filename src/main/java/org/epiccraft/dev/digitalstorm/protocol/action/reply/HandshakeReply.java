@@ -11,8 +11,13 @@ import java.util.List;
  */
 public class HandshakeReply extends Reply {
 
-    public boolean authSuccess;
+    public boolean authStatus;
+    public FailureReason failureReason;
     public List<InetSocketAddress> nodeUnits;
     public NodeInfo nodeInfo; //remote node action
+
+    public enum FailureReason {
+        INCOMPATIBLE_PROTOCOL_VERSION, INCOMPATIBLE_PROTOCOL_LIB_VERSION, AUTHORIZE_FAILED
+    }
 
 }

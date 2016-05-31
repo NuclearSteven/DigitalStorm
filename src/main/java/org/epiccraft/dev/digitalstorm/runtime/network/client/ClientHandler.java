@@ -1,6 +1,5 @@
 package org.epiccraft.dev.digitalstorm.runtime.network.client;
 
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
@@ -9,7 +8,7 @@ import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.action.request.HandshakeRequest;
-import org.epiccraft.dev.digitalstorm.runtime.exception.NodeAlreadyConnectedException;
+import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
 import org.epiccraft.dev.digitalstorm.runtime.exception.UnknownException;
 import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
@@ -45,6 +44,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
         HandshakeRequest handshakeRequest = new HandshakeRequest();
 		handshakeRequest.nodeInfo = new NodeInfo();
 		handshakeRequest.nodeInfo.nodeUUID = UUID.randomUUID();
+        handshakeRequest.nodeInfo.protocolVersion = Packet.PROTOCOL_VERSION;
         handshakeRequest.nodeInfo.type = networkManager.getDigitalStorm().getConfig().type;
         handshakeRequest.connectPassword = networkManager.getDigitalStorm().getConfig().connectionPassword;
 		ctx.write(handshakeRequest);
@@ -54,7 +54,9 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         networkStatus = NetworkStatus.INACTIVE;
-        networkManager.nodeDisconnected(getSocketChannel().remoteAddress());
+        if (!networkManager.nodeDisconnected(getSocketChannel().remoteAddress()).doReconnect()) {
+            clientSocket.getReconnectListsner().setReconnect(false);
+        }
     }
 
 	@Override
@@ -78,8 +80,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 
 	private void handlePacket(ChannelHandlerContext ctx, Object msg) {
 		if (msg instanceof HandshakeReply) {
-			if (!((HandshakeReply) msg).authSuccess) {
-				networkManager.getDigitalStorm().getLogger().warning("Node auth failed: " + ctx.channel().remoteAddress());
+			if (!((HandshakeReply) msg).authStatus) {
+				networkManager.getDigitalStorm().getLogger().warning("Node authorize failed: " + ctx.channel().remoteAddress() + "because of" + ((HandshakeReply) msg).failureReason);
                 ctx.close();
                 return;
 			} else {
@@ -90,8 +92,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
             Node node = null;
             try {
                 node = networkManager.newNodeConnected(((HandshakeReply) msg).nodeInfo, socketChannel.remoteAddress()).bindHandler(this);
-            } catch (NodeAlreadyConnectedException e) {
-                networkManager.getDigitalStorm().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
+            } catch (ConnectionException e) {
+                networkManager.getDigitalStorm().getLogger().warning(e.toString());
                 ctx.close();
                 socketChannel.close();
             }
@@ -112,7 +114,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 		ReferenceCountUtil.release(msg);
 	}
 
-	@Override
+    @Override
 	public NetworkStatus getNetworkStatus() {
 		return networkStatus;
 	}

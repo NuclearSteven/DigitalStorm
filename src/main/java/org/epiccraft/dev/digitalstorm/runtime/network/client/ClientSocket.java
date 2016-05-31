@@ -92,18 +92,29 @@ public class ClientSocket {
             });
         }
         channelFuture.sync().channel().closeFuture().sync();
-        System.out.println("finish");
 
+    }
+
+    public ReconnectListener getReconnectListsner() {
+        return reconnectListsner;
     }
 
     public class ReconnectListener implements ChannelFutureListener {
 
+        private boolean reconnect;
+
         @Override
         public void operationComplete(ChannelFuture future) throws Exception {
+            if (!reconnect) {
+                return;
+            }
             future.channel().disconnect();
             initConnection();
         }
 
+        public void setReconnect(boolean reconnect) {
+            this.reconnect = reconnect;
+        }
     }
 
     public void disconnect() {

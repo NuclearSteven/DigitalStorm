@@ -2,10 +2,10 @@ package org.epiccraft.dev.digitalstorm.runtime.network;
 
 import org.epiccraft.dev.digitalstorm.DigitalStorm;
 import org.epiccraft.dev.digitalstorm.event.RawConnetedEvent;
-import org.epiccraft.dev.digitalstorm.event.RawDisconnectEvent;
+import org.epiccraft.dev.digitalstorm.event.RawDisconnectedEvent;
 import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
-import org.epiccraft.dev.digitalstorm.runtime.exception.NodeAlreadyConnectedException;
+import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
 import org.epiccraft.dev.digitalstorm.runtime.network.client.ClientSocket;
 import org.epiccraft.dev.digitalstorm.runtime.network.server.ServerSocket;
 import org.epiccraft.dev.digitalstorm.structure.Node;
@@ -28,6 +28,7 @@ public class NetworkManager extends Thread {
     private List<ClientSocket> clientSockets;
     private ConcurrentHashMap<UUID, Node> nodeMap = new ConcurrentHashMap<>();
     private UUID uuid;
+    private TrafficManager trafficManager;
 
     public NetworkManager(DigitalStorm digitalStorm) {
         this.digitalStorm = digitalStorm;
@@ -42,8 +43,14 @@ public class NetworkManager extends Thread {
         initialize();
     }
 
+    public TrafficManager getTrafficManager() {
+        return trafficManager;
+    }
+
     private void initialize() {
         try {
+
+            this.trafficManager = new TrafficManager(this);
             if (digitalStorm.getConfig().serverSideTraffic)
                 serverSocket = new ServerSocket(this, digitalStorm.getConfig().localNodeNetworkAddress, digitalStorm.getConfig().SSL);
             if (digitalStorm.getConfig().clientSideTraffic)
@@ -67,7 +74,7 @@ public class NetworkManager extends Thread {
         }
     }
 
-    public Node newNodeConnected(NodeInfo nodeInfo, SocketAddress socketAddress) throws NodeAlreadyConnectedException {
+    public Node newNodeConnected(NodeInfo nodeInfo, SocketAddress socketAddress) throws ConnectionException {
         boolean match = false;
         for (Map.Entry<UUID, Node> uuidNodeEntry : getNodeMap().entrySet()) {
             if (uuidNodeEntry.getKey().equals(nodeInfo.nodeUUID)) {
@@ -76,7 +83,7 @@ public class NetworkManager extends Thread {
         }
 
         if (match) {
-            throw new NodeAlreadyConnectedException();
+            throw new ConnectionException("Node has already connected.", null);
         }
 
         Node node = new Node(this, nodeInfo);
@@ -87,12 +94,14 @@ public class NetworkManager extends Thread {
         return node;
     }
 
-    public void nodeDisconnected(SocketAddress socketAddress) {
+    public RawDisconnectedEvent nodeDisconnected(SocketAddress socketAddress) {
         nodeMap.entrySet().stream().filter(uuidNodeEntry -> uuidNodeEntry.getValue().getHandler().getSocketChannel().remoteAddress().equals(socketAddress)).forEach(uuidNodeEntry -> {
             nodeMap.remove(uuidNodeEntry.getKey());
         });
 
-        digitalStorm.getEventFactory().broadcastEvent(new RawDisconnectEvent(socketAddress));
+        RawDisconnectedEvent rawDisconnectedEvent = new RawDisconnectedEvent(socketAddress);
+        digitalStorm.getEventFactory().broadcastEvent(rawDisconnectedEvent);
+        return rawDisconnectedEvent;
     }
 
     public void packetReceived(Packet msg, PacketHandler packetHandler) {

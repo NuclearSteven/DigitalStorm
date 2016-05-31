@@ -44,4 +44,14 @@ public class Node implements Serializable {
     public PacketHandler getHandler() {
         return handler;
     }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                ", networkManager=" + networkManager +
+                ", handler=" + handler +
+                '}';
+    }
 }

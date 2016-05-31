@@ -10,9 +10,10 @@ import org.epiccraft.dev.digitalstorm.protocol.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.action.request.HandshakeRequest;
 import org.epiccraft.dev.digitalstorm.protocol.heartbeat.ACK;
 import org.epiccraft.dev.digitalstorm.protocol.heartbeat.NACK;
-import org.epiccraft.dev.digitalstorm.runtime.exception.NodeAlreadyConnectedException;
+import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
 import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
+import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
@@ -27,6 +28,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
     private NetworkManager networkManager;
     private NetworkStatus networkStatus;
     private long lastActive;
+    private Node node;
 
     public ServerHandler(NetworkManager networkManager, SocketChannel ch) {
         this.networkManager = networkManager;
@@ -43,11 +45,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
         networkStatus = NetworkStatus.INACTIVE;
 
         //Start reconnect process
-		// TODO: 5/15/2016
+        networkManager.getDigitalStorm().getLogger().warning("Lost connection from " + node + ", waiting response...");
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        lastActive = System.currentTimeMillis();
+
         handlePacket(ctx, msg);
     }
 
@@ -55,8 +59,14 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
         lastActive = System.currentTimeMillis();
         if (msg instanceof HandshakeRequest) {
             HandshakeReply reply = new HandshakeReply();
-            if (((HandshakeRequest) msg).connectPassword.equals(networkManager.getDigitalStorm().getConfig().connectionPassword)) {
-                reply.authSuccess = true;
+            if (((HandshakeRequest) msg).nodeInfo.protocolVersion != Packet.PROTOCOL_VERSION) {
+                reply.authStatus = false;
+                reply.failureReason = HandshakeReply.FailureReason.INCOMPATIBLE_PROTOCOL_VERSION;
+            } else if (!((HandshakeRequest) msg).connectPassword.equals(networkManager.getDigitalStorm().getConfig().connectionPassword)) {
+                reply.authStatus = false;
+                reply.failureReason = HandshakeReply.FailureReason.AUTHORIZE_FAILED;
+            } else {
+                reply.authStatus = true;
                 List<InetSocketAddress> list = new LinkedList<>();
                 networkManager.getNodeMap().forEach((aLong, node) -> {
                     if (!node.getHandler().getSocketChannel().remoteAddress().equals(socketChannel.remoteAddress())) {
@@ -66,16 +76,15 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 reply.nodeUnits = list;
                 reply.nodeInfo = new NodeInfo();
                 reply.nodeInfo.nodeUUID = networkManager.getUuid();
+                reply.nodeInfo.protocolVersion = Packet.PROTOCOL_VERSION;
                 reply.nodeInfo.type = networkManager.getDigitalStorm().getConfig().type;
-            } else {
-                reply.authSuccess = false;
             }
             ctx.write(reply);
 
             try {
-                networkManager.newNodeConnected(((HandshakeRequest) msg).nodeInfo, socketChannel.remoteAddress()).bindHandler(this);
-            } catch (NodeAlreadyConnectedException e) {
-                networkManager.getDigitalStorm().getLogger().warning("Node already connected: " + socketChannel.remoteAddress());
+                node = networkManager.newNodeConnected(((HandshakeRequest) msg).nodeInfo, socketChannel.remoteAddress()).bindHandler(this);
+            } catch (ConnectionException e) {
+                networkManager.getDigitalStorm().getLogger().warning(e.toString());
                 ctx.close();
             }
         } else {

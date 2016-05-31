@@ -1,5 +1,7 @@
 package org.epiccraft.dev.digitalstorm.runtime.network;
 
+import org.epiccraft.dev.digitalstorm.structure.Node;
+
 /**
  * Project DigitalStorm
  */

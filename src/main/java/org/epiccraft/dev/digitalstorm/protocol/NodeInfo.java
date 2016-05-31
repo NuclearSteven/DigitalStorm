@@ -9,6 +9,7 @@ import java.util.UUID;
 public class NodeInfo implements Serializable {
 
     public String type;
+    public int protocolVersion;
     public UUID nodeUUID;
 
 }
