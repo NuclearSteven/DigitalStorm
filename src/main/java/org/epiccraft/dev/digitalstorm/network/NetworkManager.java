@@ -1,4 +1,4 @@
-package org.epiccraft.dev.digitalstorm.runtime.network;
+package org.epiccraft.dev.digitalstorm.network;
 
 import org.epiccraft.dev.digitalstorm.DigitalStorm;
 import org.epiccraft.dev.digitalstorm.event.RawConnetedEvent;
@@ -6,8 +6,8 @@ import org.epiccraft.dev.digitalstorm.event.RawDisconnectedEvent;
 import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
-import org.epiccraft.dev.digitalstorm.runtime.network.client.ClientSocket;
-import org.epiccraft.dev.digitalstorm.runtime.network.server.ServerSocket;
+import org.epiccraft.dev.digitalstorm.network.client.ClientSocket;
+import org.epiccraft.dev.digitalstorm.network.server.ServerSocket;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;

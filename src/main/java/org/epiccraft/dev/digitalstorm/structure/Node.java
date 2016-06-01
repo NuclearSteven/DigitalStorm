@@ -2,8 +2,8 @@ package org.epiccraft.dev.digitalstorm.structure;
 
 import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
-import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
-import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
+import org.epiccraft.dev.digitalstorm.network.NetworkManager;
+import org.epiccraft.dev.digitalstorm.network.PacketHandler;
 
 import java.io.Serializable;
 import java.util.UUID;

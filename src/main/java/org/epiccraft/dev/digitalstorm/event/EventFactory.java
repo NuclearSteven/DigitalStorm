@@ -3,8 +3,8 @@ package org.epiccraft.dev.digitalstorm.event;
 import org.epiccraft.dev.digitalstorm.event.handler.NetworkHandler;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelDataPacket;
-import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
-import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
+import org.epiccraft.dev.digitalstorm.network.NetworkManager;
+import org.epiccraft.dev.digitalstorm.network.PacketHandler;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.util.LinkedList;

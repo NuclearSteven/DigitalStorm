@@ -2,7 +2,7 @@ package org.epiccraft.dev.digitalstorm;
 
 import org.epiccraft.dev.digitalstorm.event.EventFactory;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConfigInvalidException;
-import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
+import org.epiccraft.dev.digitalstorm.network.NetworkManager;
 
 import java.util.logging.Logger;
 

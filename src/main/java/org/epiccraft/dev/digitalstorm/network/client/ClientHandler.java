@@ -1,4 +1,4 @@
-package org.epiccraft.dev.digitalstorm.runtime.network.client;
+package org.epiccraft.dev.digitalstorm.network.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -10,8 +10,8 @@ import org.epiccraft.dev.digitalstorm.protocol.system.action.reply.HandshakeRepl
 import org.epiccraft.dev.digitalstorm.protocol.system.action.request.HandshakeRequest;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
 import org.epiccraft.dev.digitalstorm.runtime.exception.UnknownException;
-import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
-import org.epiccraft.dev.digitalstorm.runtime.network.PacketHandler;
+import org.epiccraft.dev.digitalstorm.network.NetworkManager;
+import org.epiccraft.dev.digitalstorm.network.PacketHandler;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;

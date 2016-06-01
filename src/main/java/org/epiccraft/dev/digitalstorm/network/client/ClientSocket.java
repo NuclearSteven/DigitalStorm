@@ -1,4 +1,4 @@
-package org.epiccraft.dev.digitalstorm.runtime.network.client;
+package org.epiccraft.dev.digitalstorm.network.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -14,7 +14,7 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import org.epiccraft.dev.digitalstorm.runtime.network.NetworkManager;
+import org.epiccraft.dev.digitalstorm.network.NetworkManager;
 
 import java.net.InetSocketAddress;
 

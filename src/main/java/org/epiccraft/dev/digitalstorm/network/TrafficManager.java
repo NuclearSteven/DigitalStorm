@@ -1,4 +1,4 @@
-package org.epiccraft.dev.digitalstorm.runtime.network;
+package org.epiccraft.dev.digitalstorm.network;
 
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.structure.Node;
