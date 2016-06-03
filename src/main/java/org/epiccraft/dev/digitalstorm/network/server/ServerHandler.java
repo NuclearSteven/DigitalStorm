@@ -4,17 +4,18 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
-import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
+import org.epiccraft.dev.digitalstorm.network.NetworkManager;
+import org.epiccraft.dev.digitalstorm.network.PacketHandler;
+import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.request.HandshakeRequest;
 import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.ACK;
 import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.NACK;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
-import org.epiccraft.dev.digitalstorm.network.NetworkManager;
-import org.epiccraft.dev.digitalstorm.network.PacketHandler;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
+import java.io.InvalidClassException;
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,9 +60,12 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
         lastActive = System.currentTimeMillis();
         if (msg instanceof HandshakeRequest) {
             HandshakeReply reply = new HandshakeReply();
-            if (((HandshakeRequest) msg).nodeInfo.protocolVersion != Packet.PROTOCOL_VERSION) {
+            if (((HandshakeRequest) msg).nodeInfomation.protocolVersion != Packet.PROTOCOL_VERSION) {
                 reply.authStatus = false;
                 reply.failureReason = HandshakeReply.FailureReason.INCOMPATIBLE_PROTOCOL_VERSION;
+            } else if (((HandshakeRequest) msg).nodeInfomation.customProtocolHashCode != networkManager.getProtocolManager().getCustomPacketHashCode()) {
+                reply.authStatus = false;
+                reply.failureReason = HandshakeReply.FailureReason.INCOMPATIBLE_PROTOCOL_LIB_VERSION;
             } else if (!((HandshakeRequest) msg).connectPassword.equals(networkManager.getDigitalStorm().getConfig().connectionPassword)) {
                 reply.authStatus = false;
                 reply.failureReason = HandshakeReply.FailureReason.AUTHORIZE_FAILED;
@@ -69,20 +73,20 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 reply.authStatus = true;
                 List<InetSocketAddress> list = new LinkedList<>();
                 networkManager.getNodeMap().forEach((aLong, node) -> {
-                    if (!node.getHandler().getSocketChannel().remoteAddress().equals(socketChannel.remoteAddress())) {
-                        list.add(node.getHandler().getSocketChannel().remoteAddress());//// TODO: 4/14/2016 fix this
+                    if (!node.getPacketHandler().getSocketChannel().remoteAddress().equals(socketChannel.remoteAddress())) {
+                        list.add(node.getPacketHandler().getSocketChannel().remoteAddress());//// TODO: 4/14/2016 fix this
                     }
                 });
                 reply.nodeUnits = list;
-                reply.nodeInfo = new NodeInfo();
-                reply.nodeInfo.nodeUUID = networkManager.getUuid();
-                reply.nodeInfo.protocolVersion = Packet.PROTOCOL_VERSION;
-                reply.nodeInfo.type = networkManager.getDigitalStorm().getConfig().type;
+                reply.nodeInfomation = new NodeInfomation();
+                reply.nodeInfomation.nodeUUID = networkManager.getUuid();
+                reply.nodeInfomation.protocolVersion = Packet.PROTOCOL_VERSION;
+                reply.nodeInfomation.type = networkManager.getDigitalStorm().getConfig().type;
             }
             ctx.write(reply);
 
             try {
-                node = networkManager.newNodeConnected(((HandshakeRequest) msg).nodeInfo, socketChannel.remoteAddress()).bindHandler(this);
+                node = ConnectionAdaptor.newNodeConnected(networkManager, ((HandshakeRequest) msg).nodeInfomation, socketChannel.remoteAddress()).bindHandler(this);
             } catch (ConnectionException e) {
                 networkManager.getDigitalStorm().getLogger().warning(e.toString());
                 ctx.close();
@@ -94,7 +98,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 return;
             }
             if (msg instanceof Packet) {
-                networkManager.packetReceived((Packet) msg, this);
+                ConnectionAdaptor.packetReceived(networkManager, (Packet) msg, this);
             }
         }
 
@@ -108,13 +112,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        networkManager.getDigitalStorm().getLogger().info("Node Disconnected: " + cause.getLocalizedMessage());
-
-        cause.printStackTrace();
+        if (cause instanceof InvalidClassException) {
+            networkManager.getDigitalStorm().getLogger().warning("Incompatible protocol version: " + socketChannel.remoteAddress());
+        }
         networkManager.getDigitalStorm().getLogger().warning("Connection error caught: " + cause.getLocalizedMessage());
-
+        cause.printStackTrace();
         ctx.close();
-        networkManager.nodeDisconnected(ctx.channel().remoteAddress());
+        ConnectionAdaptor.nodeDisconnected(networkManager, ctx.channel().remoteAddress());
     }
 
     @Override

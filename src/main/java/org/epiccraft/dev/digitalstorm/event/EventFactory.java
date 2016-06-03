@@ -37,7 +37,7 @@ public class EventFactory {
         for (NetworkHandler networkHandler : networkHandlers) {
             System.out.println("sethanlder");
             for (Map.Entry<UUID, Node> uuidNodeEntry : networkManager.getNodeMap().entrySet()) {
-                if (uuidNodeEntry.getValue().getHandler() == handler) {
+                if (uuidNodeEntry.getValue().getPacketHandler() == handler) {
                     packet.setSender(uuidNodeEntry.getValue());
                 }
             }

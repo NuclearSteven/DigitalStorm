@@ -1,7 +1,7 @@
 package org.epiccraft.dev.digitalstorm.protocol.system.action.request;
 
 import org.epiccraft.dev.digitalstorm.protocol.system.action.Request;
-import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
+import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
 
 /**
  * Project DigitalStorm
@@ -9,6 +9,6 @@ import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
 public class HandshakeRequest extends Request {
 
     public String connectPassword;
-    public NodeInfo nodeInfo;
+    public NodeInfomation nodeInfomation;
 
 }

@@ -21,12 +21,12 @@ public class DigitalStorm {
     public DigitalStorm(NodeConfig nodeConfig) {
         instance = this;
         config = nodeConfig;
-        initialize();
-    }
-
-    private void initialize() {
         networkManager = new NetworkManager(this);
         eventFactory = new EventFactory(networkManager);
+    }
+
+    public void initializeNetwork() {
+        networkManager.start();
     }
 
     public static DigitalStorm create(NodeConfig nodeConfig) throws ConfigInvalidException {

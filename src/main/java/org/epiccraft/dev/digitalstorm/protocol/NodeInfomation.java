@@ -6,10 +6,11 @@ import java.util.UUID;
 /**
  * Project DigitalStorm
  */
-public class NodeInfo implements Serializable {
+public class NodeInfomation implements Serializable {
 
     public String type;
-    public int protocolVersion;
     public UUID nodeUUID;
+    public int protocolVersion;
+    public int customProtocolHashCode;
 
 }

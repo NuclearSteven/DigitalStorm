@@ -41,6 +41,11 @@ public class NodeConfig {
     public String type = "Default";
 
     /**
+     * Lock the packets automatically so no need to lock manually in ProtocolManager
+     */
+    public boolean autoLockCustomPacket = false;
+
+    /**
      * DEBUG & Advanced Settings
      */
     public boolean clientSideTraffic = true;

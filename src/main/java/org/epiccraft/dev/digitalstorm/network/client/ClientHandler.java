@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
-import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
+import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.request.HandshakeRequest;
@@ -42,10 +42,11 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 	{
         networkStatus = NetworkStatus.ACTIVE;
         HandshakeRequest handshakeRequest = new HandshakeRequest();
-		handshakeRequest.nodeInfo = new NodeInfo();
-		handshakeRequest.nodeInfo.nodeUUID = UUID.randomUUID();
-        handshakeRequest.nodeInfo.protocolVersion = Packet.PROTOCOL_VERSION;
-        handshakeRequest.nodeInfo.type = networkManager.getDigitalStorm().getConfig().type;
+		handshakeRequest.nodeInfomation = new NodeInfomation();
+        handshakeRequest.nodeInfomation.type = networkManager.getDigitalStorm().getConfig().type;
+		handshakeRequest.nodeInfomation.nodeUUID = UUID.randomUUID();
+        handshakeRequest.nodeInfomation.protocolVersion = Packet.PROTOCOL_VERSION;
+        handshakeRequest.nodeInfomation.customProtocolHashCode = networkManager.getProtocolManager().getCustomPacketHashCode();
         handshakeRequest.connectPassword = networkManager.getDigitalStorm().getConfig().connectionPassword;
 		ctx.write(handshakeRequest);
 		ctx.flush();
@@ -54,7 +55,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         networkStatus = NetworkStatus.INACTIVE;
-        if (!networkManager.nodeDisconnected(getSocketChannel().remoteAddress()).doReconnect()) {
+        if (!ConnectionAdaptor.nodeDisconnected(networkManager, getSocketChannel().remoteAddress()).doReconnect()) {
             clientSocket.getReconnectListsner().setReconnect(false);
         }
     }
@@ -91,7 +92,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 
             Node node = null;
             try {
-                node = networkManager.newNodeConnected(((HandshakeReply) msg).nodeInfo, socketChannel.remoteAddress()).bindHandler(this);
+                node = ConnectionAdaptor.newNodeConnected(networkManager, ((HandshakeReply) msg).nodeInfomation, socketChannel.remoteAddress()).bindHandler(this);
             } catch (ConnectionException e) {
                 networkManager.getDigitalStorm().getLogger().warning(e.toString());
                 ctx.close();
@@ -108,7 +109,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 				networkManager.getDigitalStorm().getLogger().info("Succeed!");
 			}
 		} else {
-            networkManager.packetReceived((Packet) msg, this);
+            ConnectionAdaptor.packetReceived(networkManager, (Packet) msg, this);
         }
 
 		ReferenceCountUtil.release(msg);

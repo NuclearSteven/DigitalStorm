@@ -1,6 +1,6 @@
 package org.epiccraft.dev.digitalstorm.structure;
 
-import org.epiccraft.dev.digitalstorm.protocol.NodeInfo;
+import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.network.PacketHandler;
@@ -16,33 +16,22 @@ public class Node implements Serializable {
     public UUID id;
     private String type;
     private NetworkManager networkManager;
-    private PacketHandler handler;
-    public Node(NetworkManager nodeNetworkManager, NodeInfo nodeInfo) {
-        this.networkManager = nodeNetworkManager;
-        this.id = nodeInfo.nodeUUID;
-        this.type = nodeInfo.type;
-    }
+    private PacketHandler packetHandler;
 
-    public String getType() {
-        return type;
+    public Node(NetworkManager nodeNetworkManager, NodeInfomation nodeInfomation) {
+        this.networkManager = nodeNetworkManager;
+        this.id = nodeInfomation.nodeUUID;
+        this.type = nodeInfomation.type;
     }
 
     public Node bindHandler(PacketHandler handler) {
-        this.handler = handler;
+        this.packetHandler = handler;
         return this;
     }
 
     public void sendPacket(Packet packet) {
-        handler.getSocketChannel().write(packet);
-        handler.getSocketChannel().flush();
-    }
-
-    public UUID getUUID() {
-        return id;
-    }
-
-    public PacketHandler getHandler() {
-        return handler;
+        packetHandler.getSocketChannel().write(packet);
+        packetHandler.getSocketChannel().flush();
     }
 
     @Override
@@ -51,7 +40,19 @@ public class Node implements Serializable {
                 "id=" + id +
                 ", type='" + type + '\'' +
                 ", networkManager=" + networkManager +
-                ", handler=" + handler +
+                ", packetHandler=" + packetHandler +
                 '}';
+    }
+
+    public PacketHandler getPacketHandler() {
+        return packetHandler;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public UUID getUUID() {
+        return id;
     }
 }

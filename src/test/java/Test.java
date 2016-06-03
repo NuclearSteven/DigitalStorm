@@ -1,6 +1,7 @@
 import org.epiccraft.dev.digitalstorm.DigitalStorm;
 import org.epiccraft.dev.digitalstorm.NodeConfig;
 import org.epiccraft.dev.digitalstorm.event.Event;
+import org.epiccraft.dev.digitalstorm.event.RawDisconnectedEvent;
 import org.epiccraft.dev.digitalstorm.event.handler.Interests;
 import org.epiccraft.dev.digitalstorm.event.handler.NetworkHandler;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
@@ -37,6 +38,10 @@ public class Test extends NetworkHandler {
         nodeConfig.checkValid();
         DigitalStorm digitalStorm = new DigitalStorm(nodeConfig);
         digitalStorm.getEventFactory().registerHandler(this);
+        digitalStorm.getNetworkManager().getProtocolManager().loadCustomPacket(TestPacket.class);
+        digitalStorm.getNetworkManager().getProtocolManager().loadCustomPacket(TestPacket2.class);
+        digitalStorm.initializeNetwork();
+        System.out.println(digitalStorm.getNetworkManager().getProtocolManager().getCustomPacketHashCode());
         String s;
         while (true) {
             s = scanner.nextLine();
@@ -70,6 +75,9 @@ public class Test extends NetworkHandler {
     @Override
     public void onEvent(Event event) {
         System.out.println(event);
+        if (event instanceof RawDisconnectedEvent) {
+            ((RawDisconnectedEvent) event).reconnect();
+        }
     }
 
     @Override

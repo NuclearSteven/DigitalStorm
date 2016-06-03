@@ -100,7 +100,7 @@ public class ClientSocket {
 
     public class ReconnectListener implements ChannelFutureListener {
 
-        private boolean reconnect;
+        private boolean reconnect = true;
 
         @Override
         public void operationComplete(ChannelFuture future) throws Exception {
