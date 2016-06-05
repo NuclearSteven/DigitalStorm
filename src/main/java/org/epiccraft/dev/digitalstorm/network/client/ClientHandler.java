@@ -4,14 +4,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
+import org.epiccraft.dev.digitalstorm.network.NetworkManager;
+import org.epiccraft.dev.digitalstorm.network.PacketHandler;
 import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.request.HandshakeRequest;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
 import org.epiccraft.dev.digitalstorm.runtime.exception.UnknownException;
-import org.epiccraft.dev.digitalstorm.network.NetworkManager;
-import org.epiccraft.dev.digitalstorm.network.PacketHandler;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
@@ -106,10 +106,14 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 			for (InetSocketAddress nodeUnit : ((HandshakeReply) msg).nodeUnits) {
 				networkManager.getDigitalStorm().getLogger().info("Connecting to " + nodeUnit.getAddress() + "...");
 				networkManager.connectToNewNode(nodeUnit);
-				networkManager.getDigitalStorm().getLogger().info("Succeed!");
+				networkManager.getDigitalStorm().getLogger().info("Connection succeeded!");
 			}
 		} else {
-            ConnectionAdaptor.packetReceived(networkManager, (Packet) msg, this);
+            if (node == null || !(msg instanceof Packet)) {
+                //unauthorized
+                return;
+            }
+            ConnectionAdaptor.handleUniversal(networkManager, (Packet) msg, ctx, node);
         }
 
 		ReferenceCountUtil.release(msg);

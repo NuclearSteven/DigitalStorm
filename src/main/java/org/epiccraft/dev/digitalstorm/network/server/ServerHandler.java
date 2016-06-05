@@ -10,8 +10,6 @@ import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.request.HandshakeRequest;
-import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.ACK;
-import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.NACK;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
@@ -92,14 +90,11 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 ctx.close();
             }
         } else {
-            if (msg instanceof ACK) {
-                ctx.write(new NACK());
-                networkManager.getDigitalStorm().getLogger().info("Packet: " + msg.getClass().getSimpleName());
+            if (node == null || !(msg instanceof Packet)) {
+                //unauthorized
                 return;
             }
-            if (msg instanceof Packet) {
-                ConnectionAdaptor.packetReceived(networkManager, (Packet) msg, this);
-            }
+            ConnectionAdaptor.handleUniversal(networkManager, (Packet) msg, ctx, node);
         }
 
         ReferenceCountUtil.release(msg);

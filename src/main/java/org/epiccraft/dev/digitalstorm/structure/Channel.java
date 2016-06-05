@@ -1,13 +1,11 @@
 package org.epiccraft.dev.digitalstorm.structure;
 
-import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelInfoPacket;
-
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by steven on 16-6-1.
+ * Project DigitalStorm
  */
 public class Channel implements Serializable {
 
@@ -17,8 +15,8 @@ public class Channel implements Serializable {
     private String channelID;
     private List<Node> joinedNodes = new LinkedList<>();
 
-    public static Channel initialize(ChannelInfoPacket packet, Node node) {
-        for (String joinedChannel : packet.joinedChannels) {
+    public static Channel join(List<String> joinedChannels, Node node) {
+        for (String joinedChannel : joinedChannels) {
             Channel existsChannel = null;
             for (Channel channel : channelList) {
                 if (channel.channelID.equals(joinedChannel)) {
@@ -36,6 +34,24 @@ public class Channel implements Serializable {
         return null;
     }
 
+    public static void leave(List<String> leavedChannels, Node node) {
+        for (String leavedChannel : leavedChannels) {
+            for (Channel channel : channelList) {
+                if (channel.getChannelID().equals(leavedChannel)) {
+                    channel.getJoinedNodes().remove(node);
+                }
+            }
+        }
+    }
+
+    public static void joinLocal(String channelID) {
+        localChannelList.add(channelID);
+    }
+
+    public static void leaveLocal(String channelID) {
+        localChannelList.remove(channelID);
+    }
+
     public static Channel getChannel(String channelID) {
         for (Channel channel : channelList) {
             if (channel.getChannelID().equals(channelID)) {
@@ -45,14 +61,8 @@ public class Channel implements Serializable {
         return null;
     }
 
-    public static void join(String channelID) {
-        localChannelList.add(channelID);
-    }
-
-    public static void leave(String channelID) {
-        for (int i = 0; i < localChannelList.size(); i++) {
-
-        }
+    public static List<String> getLocalChannelList() {
+        return localChannelList;
     }
 
     private Channel(String channelID) {

@@ -11,6 +11,7 @@ import java.util.logging.Logger;
  */
 public class DigitalStorm {
 
+    public final static String VERSION = "1.0";
     private static DigitalStorm instance;
     private Logger logger;
     private NodeConfig config;
@@ -20,6 +21,7 @@ public class DigitalStorm {
 
     public DigitalStorm(NodeConfig nodeConfig) {
         instance = this;
+        getLogger().info("Loading DigitalStorm[v" + VERSION + "]");
         config = nodeConfig;
         networkManager = new NetworkManager(this);
         eventFactory = new EventFactory(networkManager);

@@ -1,11 +1,19 @@
 package org.epiccraft.dev.digitalstorm.network;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import org.epiccraft.dev.digitalstorm.event.RawConnetedEvent;
 import org.epiccraft.dev.digitalstorm.event.RawDisconnectedEvent;
 import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelDataPacket;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelPacket;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.JoinChannelPacket;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.LeaveChannelPacket;
+import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.ACK;
+import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.NACK;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
+import org.epiccraft.dev.digitalstorm.structure.Channel;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.SocketAddress;
@@ -28,6 +36,25 @@ public interface PacketHandler {
     SocketChannel getSocketChannel();
 
     class ConnectionAdaptor {
+
+        public static void handleUniversal(NetworkManager networkManager, Packet msg, ChannelHandlerContext ctx, Node node) {
+            if (msg instanceof ACK) {
+                ctx.write(new NACK());
+            } else if (msg instanceof ChannelPacket) {
+                if (msg instanceof JoinChannelPacket) {
+                    Channel.join(((JoinChannelPacket) msg).channelIDs, node);
+                } else if (msg instanceof LeaveChannelPacket) {
+                    Channel.leave(((LeaveChannelPacket) msg).channelIDs, node);
+                } else if (msg instanceof ChannelDataPacket) {
+                    Channel channel;
+                    if ((channel = Channel.getChannel(((ChannelDataPacket) msg).channelID)) != null && Channel.getLocalChannelList().contains(channel.getChannelID())) {
+                        ConnectionAdaptor.packetReceived(networkManager, msg, node);
+                    }
+                }
+            } else {
+                ConnectionAdaptor.packetReceived(networkManager, msg, node);
+            }
+        }
 
         public static Node newNodeConnected(NetworkManager networkManager, NodeInfomation nodeInfomation, SocketAddress socketAddress) throws ConnectionException {
             for (Map.Entry<UUID, Node> uuidNodeEntry : networkManager.getNodeMap().entrySet()) {
@@ -55,8 +82,8 @@ public interface PacketHandler {
             return rawDisconnectedEvent;
         }
 
-        public static void packetReceived(NetworkManager networkManager, Packet msg, PacketHandler packetHandler) {
-            networkManager.getDigitalStorm().getEventFactory().broadcastPacket(msg, packetHandler);
+        public static void packetReceived(NetworkManager networkManager, Packet msg, Node node) {
+            networkManager.getDigitalStorm().getEventFactory().broadcastPacket(msg, node);
         }
 
     }

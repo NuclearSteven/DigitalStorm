@@ -1,18 +1,20 @@
 package org.epiccraft.dev.digitalstorm.protocol.system.channel;
 
+import java.io.Serializable;
+
 /**
  * Project DigitalStorm
  */
 public class ChannelDataPacket extends ChannelPacket {
 
-//    public Channel channel;
-    public Object msg;
-//
-//    @Override
-//    public String toString() {
-//        return "ChannelDataPacket{" +
-//                "channel=" + channel +
-//                ", msg=" + msg +
-//                '}';
-//    }
+    public String channelID;
+    public Serializable msg;
+
+    @Override
+    public String toString() {
+        return "ChannelDataPacket{" +
+                "channelID='" + channelID + '\'' +
+                ", msg=" + msg +
+                '}';
+    }
 }
