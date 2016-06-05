@@ -35,7 +35,6 @@ public class EventFactory {
 
     public void broadcastPacket(Packet packet, PacketHandler handler) {
         for (NetworkHandler networkHandler : networkHandlers) {
-            System.out.println("sethanlder");
             for (Map.Entry<UUID, Node> uuidNodeEntry : networkManager.getNodeMap().entrySet()) {
                 if (uuidNodeEntry.getValue().getPacketHandler() == handler) {
                     packet.setSender(uuidNodeEntry.getValue());
