@@ -24,7 +24,7 @@ public abstract class Packet implements Serializable {
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "{" +
-                "sender=" + sender.getUUID() +
+                "sender=" + (sender == null ? "unidentified" : sender.getUUID()) +
                 '}';
     }
 

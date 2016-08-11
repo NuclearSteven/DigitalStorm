@@ -45,6 +45,15 @@ public class Channel implements Serializable {
     }
 
     public static void joinLocal(String channelID) {
+        boolean exists = false;
+        for (Channel channel : channelList) {
+            if (channel.getChannelID().equals(channelID)) {
+                exists = true;
+            }
+        }
+        if (!exists) {
+            channelList.add(new Channel(channelID));
+        }
         localChannelList.add(channelID);
     }
 

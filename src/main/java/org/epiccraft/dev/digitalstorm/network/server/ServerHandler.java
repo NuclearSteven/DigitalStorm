@@ -92,9 +92,11 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 networkManager.getDigitalStorm().getLogger().warning(e.toString());
                 ctx.close();
             }
+            Channel.join(((HandshakeRequest) msg).nodeInformation.channels, node);
         } else {
             if (node == null || !(msg instanceof Packet)) {
                 //unauthorized
+                networkManager.getDigitalStorm().getLogger().warning("Unidentified node packet received.");
                 return;
             }
             ConnectionAdaptor.handleUniversal(networkManager, (Packet) msg, ctx, node);

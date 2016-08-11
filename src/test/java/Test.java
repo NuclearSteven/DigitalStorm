@@ -7,12 +7,9 @@ import org.epiccraft.dev.digitalstorm.event.handler.NetworkHandler;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.PING;
 import org.epiccraft.dev.digitalstorm.structure.Channel;
-import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.UUID;
 
 /**
  * Project DigitalStorm
@@ -43,7 +40,9 @@ public class Test extends NetworkHandler {
         digitalStorm.getNetworkManager().getProtocolManager().loadCustomPacket(TestPacket.class);
         digitalStorm.getNetworkManager().getProtocolManager().loadCustomPacket(TestPacket2.class);
         digitalStorm.initializeNetwork();
-        digitalStorm.getNetworkManager().joinChannel(channel);
+        if (!channel.equals("")) {
+            digitalStorm.getNetworkManager().joinChannel(channel);
+        }
         System.out.println(digitalStorm.getNetworkManager().getProtocolManager().getCustomPacketHashCode());
         String s;
         while (true) {
@@ -53,10 +52,7 @@ public class Test extends NetworkHandler {
             }
             if (s.equals("break"))
                 break;
-            for (Map.Entry<UUID, Node> uuidNodeEntry : digitalStorm.getNetworkManager().getNodeMap().entrySet()) {
-                System.out.println("send");
-                uuidNodeEntry.getValue().sendPacket(new PING());
-            }
+            digitalStorm.getNetworkManager().broadcast(new PING(), Channel.getChannel(channel));
         }
     }
 

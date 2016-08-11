@@ -99,6 +99,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
             try {
                 ((HandshakeReply) msg).nodeInformation.serverAddress = (InetSocketAddress) ctx.channel().remoteAddress();
                 node = ConnectionAdaptor.newNodeConnected(networkManager, ((HandshakeReply) msg).nodeInformation, socketChannel.remoteAddress()).bindHandler(this);
+                Channel.join(((HandshakeReply) msg).nodeInformation.channels, node);
             } catch (ConnectionException e) {
                 e.printStackTrace();
                 networkManager.getDigitalStorm().getLogger().warning(e.toString());

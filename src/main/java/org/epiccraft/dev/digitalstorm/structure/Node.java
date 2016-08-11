@@ -38,6 +38,7 @@ public class Node implements Serializable {
     }
 
     public void sendPacket(Packet packet) {
+        networkManager.getDigitalStorm().getLogger().info("Packet sent " + packet.getClass().getSimpleName());
         packetHandler.getSocketChannel().write(packet);
         packetHandler.getSocketChannel().flush();
     }
