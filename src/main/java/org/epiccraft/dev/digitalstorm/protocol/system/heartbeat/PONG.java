@@ -5,6 +5,6 @@ import org.epiccraft.dev.digitalstorm.protocol.Packet;
 /**
  * Project DigitalStorm
  */
-public class ACK extends Packet {
+public class PONG extends Packet {
 
 }

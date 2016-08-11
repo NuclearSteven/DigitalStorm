@@ -4,14 +4,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import org.epiccraft.dev.digitalstorm.event.RawConnetedEvent;
 import org.epiccraft.dev.digitalstorm.event.RawDisconnectedEvent;
-import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
+import org.epiccraft.dev.digitalstorm.protocol.NodeInformation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelDataPacket;
 import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelPacket;
 import org.epiccraft.dev.digitalstorm.protocol.system.channel.JoinChannelPacket;
 import org.epiccraft.dev.digitalstorm.protocol.system.channel.LeaveChannelPacket;
-import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.ACK;
-import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.NACK;
+import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.PING;
+import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.PONG;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
 import org.epiccraft.dev.digitalstorm.structure.Channel;
 import org.epiccraft.dev.digitalstorm.structure.Node;
@@ -38,8 +38,8 @@ public interface PacketHandler {
     class ConnectionAdaptor {
 
         public static void handleUniversal(NetworkManager networkManager, Packet msg, ChannelHandlerContext ctx, Node node) {
-            if (msg instanceof ACK) {
-                ctx.write(new NACK());
+            if (msg instanceof PING) {
+                ctx.write(new PONG());
             } else if (msg instanceof ChannelPacket) {
                 if (msg instanceof JoinChannelPacket) {
                     Channel.join(((JoinChannelPacket) msg).channelIDs, node);
@@ -48,23 +48,27 @@ public interface PacketHandler {
                 } else if (msg instanceof ChannelDataPacket) {
                     Channel channel;
                     if ((channel = Channel.getChannel(((ChannelDataPacket) msg).channelID)) != null && Channel.getLocalChannelList().contains(channel.getChannelID())) {
-                        ConnectionAdaptor.packetReceived(networkManager, msg, node);
+                        channelPacketReceived(networkManager, msg, node, channel);
                     }
                 }
             } else {
-                ConnectionAdaptor.packetReceived(networkManager, msg, node);
+                packetReceived(networkManager, msg, node);
             }
         }
 
-        public static Node newNodeConnected(NetworkManager networkManager, NodeInfomation nodeInfomation, SocketAddress socketAddress) throws ConnectionException {
+        private static void channelPacketReceived(NetworkManager networkManager, Packet msg, Node node, Channel c) {
+            networkManager.getDigitalStorm().getEventFactory().broadcastChannelPacket(msg, node, c);
+        }
+
+        public static Node newNodeConnected(NetworkManager networkManager, NodeInformation nodeInformation, SocketAddress socketAddress) throws ConnectionException {
             for (Map.Entry<UUID, Node> uuidNodeEntry : networkManager.getNodeMap().entrySet()) {
-                if (uuidNodeEntry.getKey().equals(nodeInfomation.nodeUUID)) {
+                if (uuidNodeEntry.getKey().equals(nodeInformation.nodeUUID)) {
                     throw new ConnectionException("Node has already connected.", null);
                 }
             }
 
-            Node node = new Node(networkManager, nodeInfomation);
-            networkManager.getNodeMap().put(nodeInfomation.nodeUUID, node);
+            Node node = new Node(networkManager, nodeInformation);
+            networkManager.getNodeMap().put(nodeInformation.nodeUUID, node);
 
             networkManager.getDigitalStorm().getEventFactory().broadcastEvent(new RawConnetedEvent(socketAddress));
 

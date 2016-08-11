@@ -4,6 +4,7 @@ import org.epiccraft.dev.digitalstorm.event.handler.NetworkHandler;
 import org.epiccraft.dev.digitalstorm.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelDataPacket;
+import org.epiccraft.dev.digitalstorm.structure.Channel;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.util.LinkedList;
@@ -34,17 +35,22 @@ public class EventFactory {
         for (NetworkHandler networkHandler : networkHandlers) {
             packet.setSender(node);
             if (networkHandler.getInterests().includeInterest(packet.getClass())) {
-                if (packet instanceof ChannelDataPacket) {
-                    networkHandler.channelPacketReceived((ChannelDataPacket) packet);
-                } else {
-                    networkHandler.packetReceived(packet);
-                }
+                networkHandler.packetReceived(packet);
             }
         }
     }
 
     public List<NetworkHandler> getNetworkHandlers() {
         return networkHandlers;
+    }
+
+    public void broadcastChannelPacket(Packet packet, Node node, Channel c) {
+        for (NetworkHandler networkHandler : networkHandlers) {
+            packet.setSender(node);
+            if (networkHandler.getInterests().includeInterest(ChannelDataPacket.class)) {
+                networkHandler.channelPacketReceived(packet, c);
+            }
+        }
     }
 
 }

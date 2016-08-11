@@ -23,16 +23,18 @@ import java.net.InetSocketAddress;
  */
 public class ClientSocket {
 
-    private final InetSocketAddress address;
-    private final SslContext sslCtx;
+    private InetSocketAddress address;
+    private SslContext sslCtx;
+    private boolean redirect;
     private ReconnectListener reconnectListsner;
     private NetworkManager networkManager;
     private ChannelFuture channelFuture;
     private ClientHandler clientHandler;
     private NioEventLoopGroup group;
 
-    public ClientSocket(final NetworkManager nodeNetworkManager, final InetSocketAddress address, boolean ssl) throws Exception {
+    public ClientSocket(final NetworkManager nodeNetworkManager, final InetSocketAddress address, boolean ssl, boolean redirect) throws Exception {
         this.networkManager = nodeNetworkManager;
+        this.redirect = redirect;
 
         final SslContext sslCtx;
         if (ssl) {
@@ -53,7 +55,7 @@ public class ClientSocket {
 
 
     public void initConnection() throws Exception {
-        initConnection(newClientHandler(address));
+        initConnection(newClientHandler(address, redirect));
     }
 
     public NioEventLoopGroup getGroup() {
@@ -90,8 +92,17 @@ public class ClientSocket {
                 channelFuture.channel().closeFuture().addListener(reconnectListsner);
             });
         }
-        channelFuture.sync().channel().closeFuture().sync();
+    }
 
+    public void shutdown() {
+        reconnectListsner.setReconnect(false);
+        try {
+            channelFuture.channel().close();
+            channelFuture.channel().closeFuture().sync();
+            group.shutdownGracefully();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public ReconnectListener getReconnectListsner() {
@@ -121,8 +132,8 @@ public class ClientSocket {
         group.shutdownGracefully();
     }
 
-    private ClientHandler newClientHandler(InetSocketAddress address) {
-        ClientHandler clientHandler = new ClientHandler(networkManager, this);
+    private ClientHandler newClientHandler(InetSocketAddress address, boolean redirect) {
+        ClientHandler clientHandler = new ClientHandler(networkManager, redirect, this);
         this.clientHandler = clientHandler;
         return clientHandler;
     }

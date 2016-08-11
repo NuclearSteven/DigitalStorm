@@ -5,8 +5,8 @@ import org.epiccraft.dev.digitalstorm.event.RawDisconnectedEvent;
 import org.epiccraft.dev.digitalstorm.event.handler.Interests;
 import org.epiccraft.dev.digitalstorm.event.handler.NetworkHandler;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
-import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelDataPacket;
-import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.ACK;
+import org.epiccraft.dev.digitalstorm.protocol.system.heartbeat.PING;
+import org.epiccraft.dev.digitalstorm.structure.Channel;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
@@ -30,17 +30,20 @@ public class Test extends NetworkHandler {
         type = input.equals("c");
         NodeConfig nodeConfig = new NodeConfig();
         nodeConfig.connectionPassword = "000";
-        nodeConfig.localNodeNetworkAddress = new InetSocketAddress("127.0.0.1", 1234);
-        nodeConfig.interfaceNodeNetworkAddress = new InetSocketAddress("127.0.0.1", 1234);
+        String local = scanner.nextLine();
+        String inf = scanner.nextLine();
+        String channel = scanner.nextLine();
+        nodeConfig.localNodeNetworkAddress = new InetSocketAddress("127.0.0.1", Integer.valueOf(local));
+        nodeConfig.interfaceNodeNetworkAddress = new InetSocketAddress("127.0.0.1", Integer.valueOf(inf));
         nodeConfig.SSL = true;
         nodeConfig.clientSideTraffic = type;
-        nodeConfig.serverSideTraffic = !type;
         nodeConfig.checkValid();
         DigitalStorm digitalStorm = new DigitalStorm(nodeConfig);
         digitalStorm.getEventFactory().registerHandler(this);
         digitalStorm.getNetworkManager().getProtocolManager().loadCustomPacket(TestPacket.class);
         digitalStorm.getNetworkManager().getProtocolManager().loadCustomPacket(TestPacket2.class);
         digitalStorm.initializeNetwork();
+        digitalStorm.getNetworkManager().joinChannel(channel);
         System.out.println(digitalStorm.getNetworkManager().getProtocolManager().getCustomPacketHashCode());
         String s;
         while (true) {
@@ -52,7 +55,7 @@ public class Test extends NetworkHandler {
                 break;
             for (Map.Entry<UUID, Node> uuidNodeEntry : digitalStorm.getNetworkManager().getNodeMap().entrySet()) {
                 System.out.println("send");
-                uuidNodeEntry.getValue().sendPacket(new ACK());
+                uuidNodeEntry.getValue().sendPacket(new PING());
             }
         }
     }
@@ -63,8 +66,8 @@ public class Test extends NetworkHandler {
     }
 
     @Override
-    public void channelPacketReceived(ChannelDataPacket channelDataPacket) {
-        System.out.println(channelDataPacket);
+    public void channelPacketReceived(Packet packet, Channel channel) {
+        System.out.println(packet + channel.getChannelID());
     }
 
     @Override

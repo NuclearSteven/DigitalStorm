@@ -6,11 +6,12 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
 import org.epiccraft.dev.digitalstorm.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.network.PacketHandler;
-import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
+import org.epiccraft.dev.digitalstorm.protocol.NodeInformation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.request.HandshakeRequest;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
+import org.epiccraft.dev.digitalstorm.structure.Channel;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.io.InvalidClassException;
@@ -58,10 +59,10 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
         lastActive = System.currentTimeMillis();
         if (msg instanceof HandshakeRequest) {
             HandshakeReply reply = new HandshakeReply();
-            if (((HandshakeRequest) msg).nodeInfomation.protocolVersion != Packet.PROTOCOL_VERSION) {
+            if (((HandshakeRequest) msg).nodeInformation.protocolVersion != Packet.PROTOCOL_VERSION) {
                 reply.authStatus = false;
                 reply.failureReason = HandshakeReply.FailureReason.INCOMPATIBLE_PROTOCOL_VERSION;
-            } else if (((HandshakeRequest) msg).nodeInfomation.customProtocolHashCode != networkManager.getProtocolManager().getCustomPacketHashCode()) {
+            } else if (((HandshakeRequest) msg).nodeInformation.customProtocolHashCode != networkManager.getProtocolManager().getCustomPacketHashCode()) {
                 reply.authStatus = false;
                 reply.failureReason = HandshakeReply.FailureReason.INCOMPATIBLE_PROTOCOL_LIB_VERSION;
             } else if (!((HandshakeRequest) msg).connectPassword.equals(networkManager.getDigitalStorm().getConfig().connectionPassword)) {
@@ -71,20 +72,22 @@ public class ServerHandler extends ChannelInboundHandlerAdapter implements Packe
                 reply.authStatus = true;
                 List<InetSocketAddress> list = new LinkedList<>();
                 networkManager.getNodeMap().forEach((aLong, node) -> {
-                    if (!node.getPacketHandler().getSocketChannel().remoteAddress().equals(socketChannel.remoteAddress())) {
-                        list.add(node.getPacketHandler().getSocketChannel().remoteAddress());//// TODO: 4/14/2016 fix this
+                    System.out.println("ServerAddr" + node.getServerAddress());
+                    if (node.getServerAddress() != null) {
+                        list.add(node.getServerAddress());
                     }
                 });
                 reply.nodeUnits = list;
-                reply.nodeInfomation = new NodeInfomation();
-                reply.nodeInfomation.nodeUUID = networkManager.getUuid();
-                reply.nodeInfomation.protocolVersion = Packet.PROTOCOL_VERSION;
-                reply.nodeInfomation.type = networkManager.getDigitalStorm().getConfig().type;
+                reply.nodeInformation = new NodeInformation();
+                reply.nodeInformation.nodeUUID = networkManager.getUuid();
+                reply.nodeInformation.protocolVersion = Packet.PROTOCOL_VERSION;
+                reply.nodeInformation.channels = Channel.getLocalChannelList();
+                reply.nodeInformation.type = networkManager.getDigitalStorm().getConfig().type;
             }
             ctx.write(reply);
 
             try {
-                node = ConnectionAdaptor.newNodeConnected(networkManager, ((HandshakeRequest) msg).nodeInfomation, socketChannel.remoteAddress()).bindHandler(this);
+                node = ConnectionAdaptor.newNodeConnected(networkManager, ((HandshakeRequest) msg).nodeInformation, socketChannel.remoteAddress()).bindHandler(this);
             } catch (ConnectionException e) {
                 networkManager.getDigitalStorm().getLogger().warning(e.toString());
                 ctx.close();

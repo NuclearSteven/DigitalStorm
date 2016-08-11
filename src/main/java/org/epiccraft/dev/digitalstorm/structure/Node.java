@@ -1,11 +1,12 @@
 package org.epiccraft.dev.digitalstorm.structure;
 
-import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
+import org.epiccraft.dev.digitalstorm.protocol.NodeInformation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.network.PacketHandler;
 
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 /**
@@ -14,14 +15,21 @@ import java.util.UUID;
 public class Node implements Serializable {
 
     public UUID id;
+    private InetSocketAddress serverAddress;
     private String type;
     private NetworkManager networkManager;
     private PacketHandler packetHandler;
 
-    public Node(NetworkManager nodeNetworkManager, NodeInfomation nodeInfomation) {
+    public Node(NetworkManager nodeNetworkManager, NodeInformation nodeInformation) {
         this.networkManager = nodeNetworkManager;
-        this.id = nodeInfomation.nodeUUID;
-        this.type = nodeInfomation.type;
+        this.id = nodeInformation.nodeUUID;
+        this.type = nodeInformation.type;
+
+        this.serverAddress = nodeInformation.serverAddress;
+    }
+
+    public InetSocketAddress getServerAddress() {
+        return serverAddress;
     }
 
     public Node bindHandler(PacketHandler handler) {

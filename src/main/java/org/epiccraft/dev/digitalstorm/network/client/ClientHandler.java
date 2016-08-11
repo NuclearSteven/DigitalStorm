@@ -6,12 +6,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.util.ReferenceCountUtil;
 import org.epiccraft.dev.digitalstorm.network.NetworkManager;
 import org.epiccraft.dev.digitalstorm.network.PacketHandler;
-import org.epiccraft.dev.digitalstorm.protocol.NodeInfomation;
+import org.epiccraft.dev.digitalstorm.protocol.NodeInformation;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.reply.HandshakeReply;
 import org.epiccraft.dev.digitalstorm.protocol.system.action.request.HandshakeRequest;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConnectionException;
 import org.epiccraft.dev.digitalstorm.runtime.exception.UnknownException;
+import org.epiccraft.dev.digitalstorm.structure.Channel;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
@@ -22,14 +23,16 @@ import java.util.UUID;
  */
 public class ClientHandler extends ChannelInboundHandlerAdapter implements PacketHandler {
 
+    private final boolean redirect;
     private ClientSocket clientSocket;
     private SocketChannel socketChannel;
 	private NetworkManager networkManager;
     private Node node;
 	private NetworkStatus networkStatus;
 
-    public ClientHandler(NetworkManager nodeNetworkManager, ClientSocket clientSocket) {
+    public ClientHandler(NetworkManager nodeNetworkManager, boolean redirect, ClientSocket clientSocket) {
         this.networkManager = nodeNetworkManager;
+        this.redirect = redirect;
         this.clientSocket = clientSocket;
     }
 
@@ -42,11 +45,13 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 	{
         networkStatus = NetworkStatus.ACTIVE;
         HandshakeRequest handshakeRequest = new HandshakeRequest();
-		handshakeRequest.nodeInfomation = new NodeInfomation();
-        handshakeRequest.nodeInfomation.type = networkManager.getDigitalStorm().getConfig().type;
-		handshakeRequest.nodeInfomation.nodeUUID = UUID.randomUUID();
-        handshakeRequest.nodeInfomation.protocolVersion = Packet.PROTOCOL_VERSION;
-        handshakeRequest.nodeInfomation.customProtocolHashCode = networkManager.getProtocolManager().getCustomPacketHashCode();
+		handshakeRequest.nodeInformation = new NodeInformation();
+        handshakeRequest.nodeInformation.serverAddress = networkManager.getDigitalStorm().getConfig().localNodeNetworkAddress;
+        handshakeRequest.nodeInformation.type = networkManager.getDigitalStorm().getConfig().type;
+		handshakeRequest.nodeInformation.nodeUUID = UUID.randomUUID();
+        handshakeRequest.nodeInformation.protocolVersion = Packet.PROTOCOL_VERSION;
+        handshakeRequest.nodeInformation.customProtocolHashCode = networkManager.getProtocolManager().getCustomPacketHashCode();
+        handshakeRequest.nodeInformation.channels = Channel.getLocalChannelList();
         handshakeRequest.connectPassword = networkManager.getDigitalStorm().getConfig().connectionPassword;
 		ctx.write(handshakeRequest);
 		ctx.flush();
@@ -92,8 +97,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
 
             Node node = null;
             try {
-                node = ConnectionAdaptor.newNodeConnected(networkManager, ((HandshakeReply) msg).nodeInfomation, socketChannel.remoteAddress()).bindHandler(this);
+                ((HandshakeReply) msg).nodeInformation.serverAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+                node = ConnectionAdaptor.newNodeConnected(networkManager, ((HandshakeReply) msg).nodeInformation, socketChannel.remoteAddress()).bindHandler(this);
             } catch (ConnectionException e) {
+                e.printStackTrace();
                 networkManager.getDigitalStorm().getLogger().warning(e.toString());
                 ctx.close();
                 socketChannel.close();
@@ -103,12 +110,14 @@ public class ClientHandler extends ChannelInboundHandlerAdapter implements Packe
             }
             this.node = node;
 
-			for (InetSocketAddress nodeUnit : ((HandshakeReply) msg).nodeUnits) {
-				networkManager.getDigitalStorm().getLogger().info("Connecting to " + nodeUnit.getAddress() + "...");
-				networkManager.connectToNewNode(nodeUnit);
-				networkManager.getDigitalStorm().getLogger().info("Connection succeeded!");
-			}
-		} else {
+            if (redirect) {
+                for (InetSocketAddress nodeUnit : ((HandshakeReply) msg).nodeUnits) {
+                    System.out.println("Node unit" + nodeUnit);
+                    networkManager.connectToNewNode(nodeUnit, false);
+                    networkManager.getDigitalStorm().getLogger().info("Connection succeeded!");
+                }
+            }
+        } else {
             if (node == null || !(msg instanceof Packet)) {
                 //unauthorized
                 return;

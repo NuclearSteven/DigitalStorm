@@ -5,6 +5,6 @@ import org.epiccraft.dev.digitalstorm.protocol.Packet;
 /**
  * Project DigitalStorm
  */
-public class NACK extends Packet {
+public class PING extends Packet {
 
 }

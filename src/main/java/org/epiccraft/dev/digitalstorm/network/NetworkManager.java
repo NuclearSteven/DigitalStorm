@@ -4,6 +4,10 @@ import org.epiccraft.dev.digitalstorm.DigitalStorm;
 import org.epiccraft.dev.digitalstorm.network.client.ClientSocket;
 import org.epiccraft.dev.digitalstorm.network.server.ServerSocket;
 import org.epiccraft.dev.digitalstorm.protocol.Packet;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.ChannelDataPacket;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.JoinChannelPacket;
+import org.epiccraft.dev.digitalstorm.protocol.system.channel.LeaveChannelPacket;
+import org.epiccraft.dev.digitalstorm.structure.Channel;
 import org.epiccraft.dev.digitalstorm.structure.Node;
 
 import java.net.InetSocketAddress;
@@ -48,8 +52,9 @@ public class NetworkManager extends Thread {
         try {
             if (digitalStorm.getConfig().serverSideTraffic)
                 serverSocket = new ServerSocket(this, digitalStorm.getConfig().localNodeNetworkAddress, digitalStorm.getConfig().SSL);
+            serverSocket.start();
             if (digitalStorm.getConfig().clientSideTraffic)
-                connectToNewNode(digitalStorm.getConfig().interfaceNodeNetworkAddress);
+                connectToNewNode(digitalStorm.getConfig().interfaceNodeNetworkAddress, true);
         } catch (Exception e) {
             e.printStackTrace();
             digitalStorm.getLogger().warning("Could not connect to network: " + e.getMessage());
@@ -62,13 +67,42 @@ public class NetworkManager extends Thread {
         }
     }
 
-    public void connectToNewNode(InetSocketAddress address) {
-        connectToNewNode(address, digitalStorm.getConfig().SSL);
+    public void broadcast(Packet packet, Channel channel) {
+        for (Map.Entry<UUID, Node> uuidNodeEntry : getNodeMap().entrySet()) {
+            Node node = uuidNodeEntry.getValue();
+            if (channel.getJoinedNodes().contains(node)) {
+                ChannelDataPacket dataPacket = new ChannelDataPacket();
+                dataPacket.msg = packet;
+                dataPacket.channelID = channel.getChannelID();
+                node.sendPacket(dataPacket);
+            }
+        }
+    }
+
+    public void joinChannel(String channel) {
+        Channel.joinLocal(channel);
+        JoinChannelPacket packet = new JoinChannelPacket();
+        packet.channelIDs.add(channel);
+        broadcast(packet);
+    }
+
+    public void leaveChannel(String channel) {
+        if (Channel.getChannel(channel) == null) {
+            return;
+        }
+        LeaveChannelPacket packet = new LeaveChannelPacket();
+        packet.channelIDs.add(channel);
+        broadcast(packet);
+    }
+
+    public void connectToNewNode(InetSocketAddress address, boolean redirect) {
+        getDigitalStorm().getLogger().info("Connecting to " + address + "...");
+        connectToNewNode(address, digitalStorm.getConfig().SSL, redirect);
     }
 	
-    public void connectToNewNode(InetSocketAddress address, boolean ssl) {
+    public void connectToNewNode(InetSocketAddress address, boolean ssl, boolean redirect) {
         try {
-            clientSockets.add(new ClientSocket(this, address, ssl));
+            clientSockets.add(new ClientSocket(this, address, ssl, redirect));
         } catch (Exception e) {
             e.printStackTrace();
             digitalStorm.getLogger().info("Client socket failed to initialize: " + e.getLocalizedMessage());
