@@ -4,6 +4,7 @@ import org.epiccraft.dev.digitalstorm.event.EventFactory;
 import org.epiccraft.dev.digitalstorm.runtime.exception.ConfigInvalidException;
 import org.epiccraft.dev.digitalstorm.network.NetworkManager;
 
+import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 /**
@@ -52,6 +53,10 @@ public class DigitalStorm {
     public Logger getLogger() {
         if (logger == null) {
             logger = Logger.getLogger("Main");
+            DigitalFormatter digitalFormatter = new DigitalFormatter();
+            for (Handler handler : logger.getParent().getHandlers()) {
+                handler.setFormatter(digitalFormatter);
+            }
         }
 
         return logger;
